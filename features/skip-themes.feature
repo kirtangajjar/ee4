@@ -116,7 +116,7 @@ Feature: Skipping themes
 
   Scenario: Skipping multiple themes via config file
     Given a WP installation
-    And a wp-cli.yml file:
+    And a ee.yml file:
       """
       skip-themes:
         - classic

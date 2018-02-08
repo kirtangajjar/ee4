@@ -1,4 +1,4 @@
-Feature: Bootstrap WP-CLI
+Feature: Bootstrap EE
 
   @require-opcache-save-comments
   Scenario: Basic Composer stack
@@ -6,10 +6,10 @@ Feature: Bootstrap WP-CLI
     And a composer.json file:
       """
       {
-          "name": "wp-cli/composer-test",
+          "name": "ee/composer-test",
           "type": "project",
           "require": {
-              "wp-cli/wp-cli": "1.1.0"
+              "ee/ee": "1.1.0"
           }
       }
       """
@@ -19,15 +19,15 @@ Feature: Bootstrap WP-CLI
     When I run `vendor/bin/wp cli version`
     Then STDOUT should contain:
       """
-      WP-CLI 1.1.0
+      EE 1.1.0
       """
 
-  Scenario: Composer stack with override requirement before WP-CLI
+  Scenario: Composer stack with override requirement before EE
     Given an empty directory
     And a composer.json file:
       """
       {
-        "name": "wp-cli/composer-test",
+        "name": "ee/composer-test",
         "type": "project",
         "minimum-stability": "dev",
         "prefer-stable": true,
@@ -41,36 +41,36 @@ Feature: Bootstrap WP-CLI
           }
         ],
         "require": {
-          "wp-cli/cli-override-command": "*",
-          "wp-cli/wp-cli": "dev-master"
+          "ee/cli-override-command": "*",
+          "ee/ee": "dev-master"
         }
       }
       """
     And a cli-override-command/cli.php file:
       """
       <?php
-      if ( ! class_exists( 'WP_CLI' ) ) {
+      if ( ! class_exists( 'EE' ) ) {
         return;
       }
       $autoload = dirname( __FILE__ ) . '/vendor/autoload.php';
       if ( file_exists( $autoload ) && ! class_exists( 'CLI_Command' ) ) {
         require_once $autoload;
       }
-      WP_CLI::add_command( 'cli', 'CLI_Command', array( 'when' => 'before_wp_load' ) );
+      EE::add_command( 'cli', 'CLI_Command', array( 'when' => 'before_wp_load' ) );
       """
     And a cli-override-command/src/CLI_Command.php file:
       """
       <?php
-      class CLI_Command extends WP_CLI_Command {
+      class CLI_Command extends EE_Command {
         public function version() {
-          WP_CLI::success( "WP-Override-CLI" );
+          EE::success( "WP-Override-CLI" );
         }
       }
       """
     And a cli-override-command/composer.json file:
       """
       {
-        "name": "wp-cli/cli-override-command",
+        "name": "ee/cli-override-command",
         "description": "A command that overrides the bundled 'cli' command.",
         "autoload": {
           "psr-4": { "": "src/" },
@@ -97,28 +97,28 @@ Feature: Bootstrap WP-CLI
     And a cli-override-command/cli.php file:
       """
       <?php
-      if ( ! class_exists( 'WP_CLI' ) ) {
+      if ( ! class_exists( 'EE' ) ) {
         return;
       }
       $autoload = dirname( __FILE__ ) . '/vendor/autoload.php';
       if ( file_exists( $autoload ) && ! class_exists( 'CLI_Command' ) ) {
         require_once $autoload;
       }
-      WP_CLI::add_command( 'cli', 'CLI_Command', array( 'when' => 'before_wp_load' ) );
+      EE::add_command( 'cli', 'CLI_Command', array( 'when' => 'before_wp_load' ) );
       """
     And a cli-override-command/src/CLI_Command.php file:
       """
       <?php
-      class CLI_Command extends WP_CLI_Command {
+      class CLI_Command extends EE_Command {
         public function version() {
-          WP_CLI::success( "WP-Override-CLI" );
+          EE::success( "WP-Override-CLI" );
         }
       }
       """
     And a cli-override-command/composer.json file:
       """
       {
-        "name": "wp-cli/cli-override",
+        "name": "ee/cli-override",
         "description": "A command that overrides the bundled 'cli' command.",
         "autoload": {
           "psr-4": { "": "src/" },
@@ -136,7 +136,7 @@ Feature: Bootstrap WP-CLI
     When I run `wp cli version`
       Then STDOUT should contain:
         """
-        WP-CLI
+        EE
         """
 
     When I run `wp --require=cli-override-command/cli.php cli version`
@@ -152,28 +152,28 @@ Feature: Bootstrap WP-CLI
     And a cli-override-command/cli.php file:
       """
       <?php
-      if ( ! class_exists( 'WP_CLI' ) ) {
+      if ( ! class_exists( 'EE' ) ) {
         return;
       }
       $autoload = dirname( __FILE__ ) . '/vendor/autoload.php';
       if ( file_exists( $autoload ) ) {
         require_once $autoload;
       }
-      WP_CLI::add_command( 'cli', 'CLI_Command', array( 'when' => 'before_wp_load' ) );
+      EE::add_command( 'cli', 'CLI_Command', array( 'when' => 'before_wp_load' ) );
       """
     And a cli-override-command/src/CLI_Command.php file:
       """
       <?php
-      class CLI_Command extends WP_CLI_Command {
+      class CLI_Command extends EE_Command {
         public function version() {
-          WP_CLI::success( "WP-Override-CLI" );
+          EE::success( "WP-Override-CLI" );
         }
       }
       """
     And a cli-override-command/composer.json file:
       """
       {
-        "name": "wp-cli/cli-override",
+        "name": "ee/cli-override",
         "description": "A command that overrides the bundled 'cli' command.",
         "autoload": {
           "psr-4": { "": "src/" },
@@ -191,7 +191,7 @@ Feature: Bootstrap WP-CLI
     When I run `{PHAR_PATH} cli version`
       Then STDOUT should contain:
         """
-        WP-CLI
+        EE
         """
 
     When I run `{PHAR_PATH} --require=cli-override-command/cli.php cli version`
@@ -200,31 +200,31 @@ Feature: Bootstrap WP-CLI
         WP-Override-CLI
         """
 
-  Scenario: Composer stack with both WordPress and wp-cli as dependencies (command line)
+  Scenario: Composer stack with both WordPress and ee as dependencies (command line)
     Given a WP installation with Composer
-    And a dependency on current wp-cli
+    And a dependency on current ee
     When I run `vendor/bin/wp option get blogname`
     Then STDOUT should contain:
       """
-      WP CLI Site with both WordPress and wp-cli as Composer dependencies
+      WP CLI Site with both WordPress and ee as Composer dependencies
       """
 
   @require-php-5.4
-  Scenario: Composer stack with both WordPress and wp-cli as dependencies (web)
+  Scenario: Composer stack with both WordPress and ee as dependencies (web)
     Given a WP installation with Composer
-    And a dependency on current wp-cli
+    And a dependency on current ee
     And a PHP built-in web server to serve 'wordpress'
     Then the HTTP status code should be 200
 
-  Scenario: Composer stack with both WordPress and wp-cli as dependencies and a custom vendor directory
+  Scenario: Composer stack with both WordPress and ee as dependencies and a custom vendor directory
     Given a WP installation with Composer and a custom vendor directory 'vendor-custom'
-    And a dependency on current wp-cli
+    And a dependency on current ee
     Then the vendor-custom/autoload_commands.php file should exist
     Then the vendor-custom/autoload_framework.php file should exist
     When I run `vendor-custom/bin/wp option get blogname`
     Then STDOUT should contain:
       """
-      WP CLI Site with both WordPress and wp-cli as Composer dependencies
+      WP CLI Site with both WordPress and ee as Composer dependencies
       """
 
   Scenario: Setting an environment variable passes the value through
@@ -234,14 +234,14 @@ Feature: Bootstrap WP-CLI
     And a env-var.php file:
       """
       <?php
-      putenv( 'WP_CLI_TEST_ENV_VAR=foo' );
+      putenv( 'EE_TEST_ENV_VAR=foo' );
       """
-    And a wp-cli.yml file:
+    And a ee.yml file:
       """
       config create:
         extra-php: |
           require_once __DIR__ . '/env-var.php';
-          define( 'WP_CLI_TEST_CONSTANT', getenv( 'WP_CLI_TEST_ENV_VAR' ) );
+          define( 'EE_TEST_CONSTANT', getenv( 'EE_TEST_ENV_VAR' ) );
       """
 
     When I run `wp config create {CORE_CONFIG_SETTINGS}`
@@ -258,7 +258,7 @@ Feature: Bootstrap WP-CLI
       """
     And the return code should be 0
 
-    When I run `wp eval 'echo constant( "WP_CLI_TEST_CONSTANT" );'`
+    When I run `wp eval 'echo constant( "EE_TEST_CONSTANT" );'`
     Then STDOUT should be:
       """
       foo
@@ -267,7 +267,7 @@ Feature: Bootstrap WP-CLI
   @require-wp-3.9
   Scenario: Run cache flush on ms_site_not_found
     Given a WP multisite installation
-    And a wp-cli.yml file:
+    And a ee.yml file:
       """
       url: invalid.com
       """
@@ -289,7 +289,7 @@ Feature: Bootstrap WP-CLI
   @require-wp-4.0
   Scenario: Run search-replace on ms_site_not_found
     Given a WP multisite installation
-    And a wp-cli.yml file:
+    And a ee.yml file:
       """
       url: invalid.com
       """

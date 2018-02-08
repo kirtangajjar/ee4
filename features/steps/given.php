@@ -2,7 +2,7 @@
 
 use Behat\Gherkin\Node\PyStringNode,
     Behat\Gherkin\Node\TableNode,
-    WP_CLI\Process;
+    EE\Process;
 
 $steps->Given( '/^an empty directory$/',
 	function ( $world ) {
@@ -13,7 +13,7 @@ $steps->Given( '/^an empty directory$/',
 $steps->Given( '/^an? (empty|non-existent) ([^\s]+) directory$/',
 	function ( $world, $empty_or_nonexistent, $dir ) {
 		$dir = $world->replace_variables( $dir );
-		if ( ! WP_CLI\Utils\is_path_absolute( $dir ) ) {
+		if ( ! EE\Utils\is_path_absolute( $dir ) ) {
 			$dir = $world->variables['RUN_DIR'] . "/$dir";
 		}
 		if ( 0 !== strpos( $dir, sys_get_temp_dir() ) ) {
@@ -135,7 +135,7 @@ $steps->Given( '/^download:$/',
 				continue;
 			}
 
-			Process::create( \WP_CLI\Utils\esc_cmd( 'curl -sSL %s > %s', $row['url'], $path ) )->run_check();
+			Process::create( \EE\Utils\esc_cmd( 'curl -sSL %s > %s', $row['url'], $path ) )->run_check();
 		}
 	}
 );
@@ -200,9 +200,9 @@ $steps->Given('/^a misconfigured WP_CONTENT_DIR constant directory$/',
 	}
 );
 
-$steps->Given( '/^a dependency on current wp-cli$/',
+$steps->Given( '/^a dependency on current ee$/',
 	function ( $world ) {
-		$world->composer_require_current_wp_cli();
+		$world->composer_require_current_ee();
 	}
 );
 

@@ -1,6 +1,6 @@
 <?php
 
-use WP_CLI\Utils;
+use EE\Utils;
 
 class WPVersionCompareTest extends PHPUnit_Framework_TestCase {
 

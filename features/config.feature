@@ -6,7 +6,7 @@ Feature: Have a config file
     When I run `wp --info`
     Then STDOUT should not contain:
       """
-      wp-cli.yml
+      ee.yml
       """
 
     When I run `wp core is-installed` from 'wp-content'
@@ -18,7 +18,7 @@ Feature: Have a config file
       """
       <?php
       """
-    And a wp-cli.yml file:
+    And a ee.yml file:
       """
       require: sample.php
       """
@@ -26,7 +26,7 @@ Feature: Have a config file
     When I run `wp --info`
     Then STDOUT should contain:
       """
-      wp-cli.yml
+      ee.yml
       """
 
     When I run `wp core is-installed`
@@ -37,7 +37,7 @@ Feature: Have a config file
 
   Scenario: WP in a subdirectory
     Given a WP installation in 'foo'
-    And a wp-cli.yml file:
+    And a ee.yml file:
       """
       path: foo
       """
@@ -45,7 +45,7 @@ Feature: Have a config file
     When I run `wp --info`
     Then STDOUT should contain:
       """
-      wp-cli.yml
+      ee.yml
       """
 
     When I run `wp core is-installed`
@@ -83,14 +83,14 @@ Feature: Have a config file
   Scenario: Nested installs
     Given a WP installation
     And a WP install in 'foo'
-    And a wp-cli.yml file:
+    And a ee.yml file:
       """
       """
 
     When I run `wp --info` from 'foo'
     Then STDOUT should not contain:
       """
-      wp-cli.yml
+      ee.yml
       """
 
   Scenario: Disabled commands
@@ -102,37 +102,37 @@ Feature: Have a config file
         - core multisite-convert
       """
 
-    When I run `WP_CLI_CONFIG_PATH=config.yml wp`
+    When I run `EE_CONFIG_PATH=config.yml wp`
     Then STDOUT should not contain:
       """
       eval-file
       """
 
-    When I try `WP_CLI_CONFIG_PATH=config.yml wp help eval-file`
+    When I try `EE_CONFIG_PATH=config.yml wp help eval-file`
     Then STDERR should be:
       """
       Error: The 'eval-file' command has been disabled from the config file.
       """
 
-    When I run `WP_CLI_CONFIG_PATH=config.yml wp core`
+    When I run `EE_CONFIG_PATH=config.yml wp core`
     Then STDOUT should not contain:
       """
       or: wp core multisite-convert
       """
 
-    When I run `WP_CLI_CONFIG_PATH=config.yml wp help core`
+    When I run `EE_CONFIG_PATH=config.yml wp help core`
     Then STDOUT should not contain:
       """
       multisite-convert
       """
 
-    When I try `WP_CLI_CONFIG_PATH=config.yml wp core multisite-convert`
+    When I try `EE_CONFIG_PATH=config.yml wp core multisite-convert`
     Then STDERR should contain:
       """
       command has been disabled
       """
 
-    When I try `WP_CLI_CONFIG_PATH=config.yml wp help core multisite-convert`
+    When I try `EE_CONFIG_PATH=config.yml wp help core multisite-convert`
     Then STDERR should contain:
       """
       Error: The 'core multisite-convert' command has been disabled from the config file.
@@ -141,7 +141,7 @@ Feature: Have a config file
   Scenario: 'core config' parameters
     Given an empty directory
     And WP files
-    And a wp-cli.yml file:
+    And a ee.yml file:
       """
       core config:
         dbname: wordpress
@@ -157,7 +157,7 @@ Feature: Have a config file
 
   Scenario: Persist positional parameters when defined in a config
     Given a WP installation
-    And a wp-cli.yml file:
+    And a ee.yml file:
       """
       user create:
         - examplejoe
@@ -192,7 +192,7 @@ Feature: Have a config file
 
   Scenario: Command-specific configs
     Given a WP installation
-    And a wp-cli.yml file:
+    And a ee.yml file:
       """
       eval:
         foo: bar
@@ -225,13 +225,13 @@ Feature: Have a config file
       require:
         - ../custom-file.php
       """
-    And a wp-cli.yml file:
+    And a ee.yml file:
       """
       require:
         - custom-file.php
       """
 
-    When I run `WP_CLI_CONFIG_PATH=test-dir/config.yml wp help`
+    When I run `EE_CONFIG_PATH=test-dir/config.yml wp help`
 	  Then STDERR should be empty
 
   Scenario: Load WordPress with `--debug`
@@ -318,9 +318,9 @@ Feature: Have a config file
       """
     And the return code should be 0
 
-  Scenario: Missing required files should not fatal WP-CLI
+  Scenario: Missing required files should not fatal EE
     Given an empty directory
-    And a wp-cli.yml file:
+    And a ee.yml file:
     """
     require:
       - missing-file.php
@@ -329,7 +329,7 @@ Feature: Have a config file
     When I try `wp help`
     Then STDERR should contain:
       """
-      Error: Required file 'missing-file.php' doesn't exist (from project's wp-cli.yml).
+      Error: Required file 'missing-file.php' doesn't exist (from project's ee.yml).
       """
 
     When I run `wp cli info`
@@ -346,7 +346,7 @@ Feature: Have a config file
         - /foo/baz.php
       """
 
-    When I try `WP_CLI_CONFIG_PATH=config.yml wp help`
+    When I try `EE_CONFIG_PATH=config.yml wp help`
     Then STDERR should contain:
       """
       Error: Required file 'baz.php' doesn't exist (from global config.yml).
@@ -369,7 +369,7 @@ Feature: Have a config file
       $command = function( $_, $assoc_args ) {
          echo json_encode( $assoc_args );
       };
-      WP_CLI::add_command( 'test-cmd', $command, array( 'when' => 'before_wp_load' ) );
+      EE::add_command( 'test-cmd', $command, array( 'when' => 'before_wp_load' ) );
       """
     And a config.yml file:
       """
@@ -378,7 +378,7 @@ Feature: Have a config file
         apple: banana
       apple: banana
       """
-    And a wp-cli.yml file:
+    And a ee.yml file:
       """
       _:
         merge: true
@@ -393,13 +393,13 @@ Feature: Have a config file
       """
       {"bar":"burrito","apple":"apple"}
       """
-    When I run `WP_CLI_CONFIG_PATH=config.yml wp --require=test-cmd.php test-cmd`
+    When I run `EE_CONFIG_PATH=config.yml wp --require=test-cmd.php test-cmd`
     Then STDOUT should be JSON containing:
       """
       {"foo":"bar","apple":"apple","bar":"burrito"}
       """
 
-    Given a wp-cli.yml file:
+    Given a ee.yml file:
       """
       _:
         merge: false
@@ -408,7 +408,7 @@ Feature: Have a config file
         apple: apple
       apple: apple
       """
-    When I run `WP_CLI_CONFIG_PATH=config.yml wp --require=test-cmd.php test-cmd`
+    When I run `EE_CONFIG_PATH=config.yml wp --require=test-cmd.php test-cmd`
     Then STDOUT should be JSON containing:
       """
       {"bar":"burrito","apple":"apple"}
@@ -422,9 +422,9 @@ Feature: Have a config file
       $command = function( $_, $assoc_args ) {
          echo json_encode( $assoc_args );
       };
-      WP_CLI::add_command( 'test-cmd', $command, array( 'when' => 'before_wp_load' ) );
+      EE::add_command( 'test-cmd', $command, array( 'when' => 'before_wp_load' ) );
       """
-    And a wp-cli.yml file:
+    And a ee.yml file:
       """
       test-cmd:
         foo: bar
@@ -438,10 +438,10 @@ Feature: Have a config file
       {"foo":"bar","apple":"banana"}
       """
 
-    Given a wp-cli.local.yml file:
+    Given a ee.local.yml file:
       """
       _:
-        inherit: wp-cli.yml
+        inherit: ee.yml
         merge: true
       test-cmd:
         bar: burrito
@@ -455,7 +455,7 @@ Feature: Have a config file
       {"foo":"bar","apple":"apple","bar":"burrito"}
       """
 
-    Given a wp-cli.local.yml file:
+    Given a ee.local.yml file:
       """
       test-cmd:
         bar: burrito
@@ -486,10 +486,10 @@ if ( file_exists( __DIR__ . '/local-dev.php' ) ) {
 
 // ** MySQL settings ** //
 /** The name of the database for WordPress */
-define('DB_NAME', 'wp_cli_test');
+define('DB_NAME', 'ee_test');
 
 /** MySQL database username */
-define('DB_USER', 'wp_cli_test');
+define('DB_USER', 'ee_test');
 
 /** MySQL database password */
 define('DB_PASSWORD', 'password1');

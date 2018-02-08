@@ -1,6 +1,6 @@
 <?php
 
-use WP_CLI\Utils;
+use EE\Utils;
 
 class BehatTagsTest extends PHPUnit_Framework_TestCase {
 
@@ -9,7 +9,7 @@ class BehatTagsTest extends PHPUnit_Framework_TestCase {
 	function setUp() {
 		parent::setUp();
 
-		$this->temp_dir = Utils\get_temp_dir() . uniqid( 'wp-cli-test-behat-tags-', true );
+		$this->temp_dir = Utils\get_temp_dir() . uniqid( 'ee-test-behat-tags-', true );
 		mkdir( $this->temp_dir );
 		mkdir( $this->temp_dir . '/features' );
 	}

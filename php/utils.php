@@ -2,18 +2,18 @@
 
 // Utilities that do NOT depend on WordPress code.
 
-namespace WP_CLI\Utils;
+namespace EE\Utils;
 
 use \Composer\Semver\Comparator;
 use \Composer\Semver\Semver;
-use \WP_CLI;
-use \WP_CLI\Dispatcher;
-use \WP_CLI\Iterators\Transform;
+use \EE;
+use \EE\Dispatcher;
+use \EE\Iterators\Transform;
 
 const PHAR_STREAM_PREFIX = 'phar://';
 
 function inside_phar() {
-	return 0 === strpos( WP_CLI_ROOT, PHAR_STREAM_PREFIX );
+	return 0 === strpos( EE_ROOT, PHAR_STREAM_PREFIX );
 }
 
 // Files that need to be read by external programs have to be extracted from the Phar archive.
@@ -24,7 +24,7 @@ function extract_from_phar( $path ) {
 
 	$fname = basename( $path );
 
-	$tmp_path = get_temp_dir() . "wp-cli-$fname";
+	$tmp_path = get_temp_dir() . "ee-$fname";
 
 	copy( $path, $tmp_path );
 
@@ -41,10 +41,10 @@ function extract_from_phar( $path ) {
 
 function load_dependencies() {
 	if ( inside_phar() ) {
-		if ( file_exists( WP_CLI_ROOT . '/vendor/autoload.php' ) ) {
-			require WP_CLI_ROOT . '/vendor/autoload.php';
-		} elseif ( file_exists( dirname( dirname( WP_CLI_ROOT ) ) . '/autoload.php' ) ) {
-			require dirname( dirname( WP_CLI_ROOT ) ) . '/autoload.php';
+		if ( file_exists( EE_ROOT . '/vendor/autoload.php' ) ) {
+			require EE_ROOT . '/vendor/autoload.php';
+		} elseif ( file_exists( dirname( dirname( EE_ROOT ) ) . '/autoload.php' ) ) {
+			require dirname( dirname( EE_ROOT ) ) . '/autoload.php';
 		}
 		return;
 	}
@@ -67,14 +67,14 @@ function load_dependencies() {
 
 function get_vendor_paths() {
 	$vendor_paths = array(
-		WP_CLI_ROOT . '/../../../vendor',  // part of a larger project / installed via Composer (preferred)
-		WP_CLI_ROOT . '/vendor',           // top-level project / installed as Git clone
+		EE_ROOT . '/../../../vendor',  // part of a larger project / installed via Composer (preferred)
+		EE_ROOT . '/vendor',           // top-level project / installed as Git clone
 	);
-	$maybe_composer_json = WP_CLI_ROOT . '/../../../composer.json';
+	$maybe_composer_json = EE_ROOT . '/../../../composer.json';
 	if ( file_exists( $maybe_composer_json ) && is_readable( $maybe_composer_json ) ) {
 		$composer = json_decode( file_get_contents( $maybe_composer_json ) );
 		if ( ! empty( $composer->config ) && ! empty( $composer->config->{'vendor-dir'} ) ) {
-			array_unshift( $vendor_paths, WP_CLI_ROOT . '/../../../' . $composer->config->{'vendor-dir'} );
+			array_unshift( $vendor_paths, EE_ROOT . '/../../../' . $composer->config->{'vendor-dir'} );
 		}
 	}
 	return $vendor_paths;
@@ -86,7 +86,7 @@ function load_file( $path ) {
 }
 
 function load_command( $name ) {
-	$path = WP_CLI_ROOT . "/php/commands/$name.php";
+	$path = EE_ROOT . "/php/commands/$name.php";
 
 	if ( is_readable( $path ) ) {
 		include_once $path;
@@ -268,7 +268,7 @@ function wp_version_compare( $since, $operator ) {
  * Render `$items` as an ASCII table:
  *
  * ```
- * WP_CLI\Utils\format_items( 'table', $items, array( 'key', 'value' ) );
+ * EE\Utils\format_items( 'table', $items, array( 'key', 'value' ) );
  *
  * # +-----+-------+
  * # | key | value |
@@ -280,7 +280,7 @@ function wp_version_compare( $since, $operator ) {
  * Or render `$items` as YAML:
  *
  * ```
- * WP_CLI\Utils\format_items( 'yaml', $items, array( 'key', 'value' ) );
+ * EE\Utils\format_items( 'yaml', $items, array( 'key', 'value' ) );
  *
  * # ---
  * # -
@@ -298,7 +298,7 @@ function wp_version_compare( $since, $operator ) {
  */
 function format_items( $format, $items, $fields ) {
 	$assoc_args = compact( 'format', 'fields' );
-	$formatter = new \WP_CLI\Formatter( $assoc_args );
+	$formatter = new \EE\Formatter( $assoc_args );
 	$formatter->display_items( $items );
 }
 
@@ -353,7 +353,7 @@ function pick_fields( $item, $fields ) {
  * @param  string  $content  Some form of text to edit (e.g. post content)
  * @return string|bool       Edited text, if file is saved from editor; false, if no change to file.
  */
-function launch_editor_for_input( $input, $filename = 'WP-CLI' ) {
+function launch_editor_for_input( $input, $filename = 'EE' ) {
 
 	check_proc_available( 'launch_editor_for_input' );
 
@@ -375,7 +375,7 @@ function launch_editor_for_input( $input, $filename = 'WP-CLI' ) {
 	} while ( ! $tmpfile );
 
 	if ( ! $tmpfile ) {
-		\WP_CLI::error( 'Error creating temporary file.' );
+		\EE::error( 'Error creating temporary file.' );
 	}
 
 	$output = '';
@@ -470,7 +470,7 @@ function run_mysql_command( $cmd, $assoc_args, $descriptors = null ) {
  */
 function mustache_render( $template_name, $data = array() ) {
 	if ( ! file_exists( $template_name ) ) {
-		$template_name = WP_CLI_ROOT . "/templates/$template_name";
+		$template_name = EE_ROOT . "/templates/$template_name";
 	}
 
 	$template = file_get_contents( $template_name );
@@ -498,7 +498,7 @@ function mustache_render( $template_name, $data = array() ) {
  * # $ wp user generate --count=500
  * # Generating users  22 % [=======>                             ] 0:05 / 0:23
  *
- * $progress = \WP_CLI\Utils\make_progress_bar( 'Generating users', $count );
+ * $progress = \EE\Utils\make_progress_bar( 'Generating users', $count );
  * for ( $i = 0; $i < $count; $i++ ) {
  *     // uses wp_insert_user() to insert the user
  *     $progress->tick();
@@ -512,11 +512,11 @@ function mustache_render( $template_name, $data = array() ) {
  * @param string  $message  Text to display before the progress bar.
  * @param integer $count    Total number of ticks to be performed.
  * @param int     $interval Optional. The interval in milliseconds between updates. Default 100.
- * @return cli\progress\Bar|WP_CLI\NoOp
+ * @return cli\progress\Bar|EE\NoOp
  */
 function make_progress_bar( $message, $count, $interval = 100 ) {
 	if ( \cli\Shell::isPiped() ) {
-		return new \WP_CLI\NoOp;
+		return new \EE\NoOp;
 	}
 
 	return new \cli\progress\Bar( $message, $count, $interval );
@@ -538,7 +538,7 @@ function parse_url( $url ) {
  * @return bool
  */
 function is_windows() {
-	return false !== ( $test_is_windows = getenv( 'WP_CLI_TEST_IS_WINDOWS' ) ) ? (bool) $test_is_windows : strtoupper( substr( PHP_OS, 0, 3 ) ) === 'WIN';
+	return false !== ( $test_is_windows = getenv( 'EE_TEST_IS_WINDOWS' ) ) ? (bool) $test_is_windows : strtoupper( substr( PHP_OS, 0, 3 ) ) === 'WIN';
 }
 
 /**
@@ -569,7 +569,7 @@ function replace_path_consts( $source, $path ) {
  *
  * $md5_response = Utils\http_request( 'GET', $download_url . '.md5' );
  * if ( 20 != substr( $md5_response->status_code, 0, 2 ) ) {
- *      WP_CLI::error( "Couldn't access md5 hash for release (HTTP code {$response->status_code})" );
+ *      EE::error( "Couldn't access md5 hash for release (HTTP code {$response->status_code})" );
  * }
  * ```
  *
@@ -588,7 +588,7 @@ function http_request( $method, $url, $data = null, $headers = array(), $options
 	if ( inside_phar() ) {
 		// cURL can't read Phar archives
 		$options['verify'] = extract_from_phar(
-			WP_CLI_VENDOR_DIR . $cert_path
+			EE_VENDOR_DIR . $cert_path
 		);
 	} else {
 		foreach ( get_vendor_paths() as $vendor_path ) {
@@ -600,7 +600,7 @@ function http_request( $method, $url, $data = null, $headers = array(), $options
 		if ( empty( $options['verify'] ) ) {
 			$error_msg = 'Cannot find SSL certificate.';
 			if ( $halt_on_error ) {
-				WP_CLI::error( $error_msg );
+				EE::error( $error_msg );
 			}
 			throw new \RuntimeException( $error_msg );
 		}
@@ -613,19 +613,19 @@ function http_request( $method, $url, $data = null, $headers = array(), $options
 		if ( 'curlerror' !== $ex->getType() || ! in_array( curl_errno( $ex->getData() ), array( CURLE_SSL_CONNECT_ERROR, CURLE_SSL_CERTPROBLEM, 77 /*CURLE_SSL_CACERT_BADFILE*/ ), true ) ) {
 			$error_msg = sprintf( "Failed to get url '%s': %s.", $url, $ex->getMessage() );
 			if ( $halt_on_error ) {
-				WP_CLI::error( $error_msg );
+				EE::error( $error_msg );
 			}
 			throw new \RuntimeException( $error_msg, null, $ex );
 		}
 		// Handle SSL certificate issues gracefully
-		\WP_CLI::warning( sprintf( "Re-trying without verify after failing to get verified url '%s' %s.", $url, $ex->getMessage() ) );
+		\EE::warning( sprintf( "Re-trying without verify after failing to get verified url '%s' %s.", $url, $ex->getMessage() ) );
 		$options['verify'] = false;
 		try {
 			return \Requests::request( $url, $headers, $data, $method, $options );
 		} catch ( \Requests_Exception $ex ) {
 			$error_msg = sprintf( "Failed to get non-verified url '%s' %s.", $url, $ex->getMessage() );
 			if ( $halt_on_error ) {
-				WP_CLI::error( $error_msg );
+				EE::error( $error_msg );
 			}
 			throw new \RuntimeException( $error_msg, null, $ex );
 		}
@@ -801,7 +801,7 @@ function get_temp_dir() {
 	$temp = trailingslashit( sys_get_temp_dir() );
 
 	if ( ! is_writable( $temp ) ) {
-		\WP_CLI::warning( "Temp directory isn't writable: {$temp}" );
+		\EE::warning( "Temp directory isn't writable: {$temp}" );
 	}
 
 	return $temp;
@@ -882,17 +882,17 @@ function report_batch_operation_results( $noun, $verb, $total, $successes, $fail
 	if ( $failures ) {
 		$failed_skipped_message = null === $skips ? '' : " ({$failures} failed" . ( $skips ? ", {$skips} skipped" : '' ) . ')';
 		if ( $successes ) {
-			WP_CLI::error( "Only {$past_tense_verb} {$successes} of {$total} {$plural_noun}{$failed_skipped_message}." );
+			EE::error( "Only {$past_tense_verb} {$successes} of {$total} {$plural_noun}{$failed_skipped_message}." );
 		} else {
-			WP_CLI::error( "No {$plural_noun} {$past_tense_verb}{$failed_skipped_message}." );
+			EE::error( "No {$plural_noun} {$past_tense_verb}{$failed_skipped_message}." );
 		}
 	} else {
 		$skipped_message = $skips ? " ({$skips} skipped)" : '';
 		if ( $successes || $skips ) {
-			WP_CLI::success( "{$past_tense_verb_upper} {$successes} of {$total} {$plural_noun}{$skipped_message}." );
+			EE::success( "{$past_tense_verb_upper} {$successes} of {$total} {$plural_noun}{$skipped_message}." );
 		} else {
 			$message = $total > 1 ? ucfirst( $plural_noun ) : ucfirst( $noun );
-			WP_CLI::success( "{$message} already {$past_tense_verb}." );
+			EE::success( "{$message} already {$past_tense_verb}." );
 		}
 	}
 }
@@ -977,8 +977,8 @@ function expand_globs( $paths, $flags = 'default' ) {
 	// Compatibility for systems without GLOB_BRACE.
 	$glob_func = 'glob';
 	if ( 'default' === $flags ) {
-		if ( ! defined( 'GLOB_BRACE' ) || getenv( 'WP_CLI_TEST_EXPAND_GLOBS_NO_GLOB_BRACE' ) ) {
-			$glob_func = 'WP_CLI\Utils\glob_brace';
+		if ( ! defined( 'GLOB_BRACE' ) || getenv( 'EE_TEST_EXPAND_GLOBS_NO_GLOB_BRACE' ) ) {
+			$glob_func = 'EE\Utils\glob_brace';
 		} else {
 			$flags = GLOB_BRACE;
 		}
@@ -1177,7 +1177,7 @@ function phar_safe_path( $path ) {
 	}
 
 	return str_replace(
-		PHAR_STREAM_PREFIX . WP_CLI_PHAR_PATH . '/',
+		PHAR_STREAM_PREFIX . EE_PHAR_PATH . '/',
 		PHAR_STREAM_PREFIX,
 		$path
 	);
@@ -1188,9 +1188,9 @@ function phar_safe_path( $path ) {
  * commands.
  *
  * This function accepts both a fully qualified class name as a string as
- * well as an object that extends `WP_CLI\Dispatcher\CompositeCommand`.
+ * well as an object that extends `EE\Dispatcher\CompositeCommand`.
  *
- * @param \WP_CLI\Dispatcher\CompositeCommand|string $command
+ * @param \EE\Dispatcher\CompositeCommand|string $command
  *
  * @return bool
  */
@@ -1199,8 +1199,8 @@ function is_bundled_command( $command ) {
 
 	if ( null === $classes ) {
 		$classes = array();
-		$class_map = WP_CLI_VENDOR_DIR . '/composer/autoload_commands_classmap.php';
-		if ( file_exists( WP_CLI_VENDOR_DIR . '/composer/' ) ) {
+		$class_map = EE_VENDOR_DIR . '/composer/autoload_commands_classmap.php';
+		if ( file_exists( EE_VENDOR_DIR . '/composer/' ) ) {
 			$classes = include $class_map;
 		}
 	}
@@ -1252,9 +1252,9 @@ function check_proc_available( $context = null, $return = false ) {
 		}
 		$msg = 'The PHP functions `proc_open()` and/or `proc_close()` are disabled. Please check your PHP ini directive `disable_functions` or suhosin settings.';
 		if ( $context ) {
-			WP_CLI::error( sprintf( "Cannot do '%s': %s", $context, $msg ) );
+			EE::error( sprintf( "Cannot do '%s': %s", $context, $msg ) );
 		} else {
-			WP_CLI::error( $msg );
+			EE::error( $msg );
 		}
 	}
 	return true;
@@ -1287,7 +1287,7 @@ function past_tense_verb( $verb ) {
 }
 
 /**
- * Get the path to the PHP binary used when executing WP-CLI.
+ * Get the path to the PHP binary used when executing EE.
  *
  * Environment values permit specific binaries to be indicated.
  *
@@ -1297,12 +1297,12 @@ function past_tense_verb( $verb ) {
  * @return string
  */
 function get_php_binary() {
-	if ( $wp_cli_php_used = getenv( 'WP_CLI_PHP_USED' ) ) {
-		return $wp_cli_php_used;
+	if ( $ee_php_used = getenv( 'EE_PHP_USED' ) ) {
+		return $ee_php_used;
 	}
 
-	if ( $wp_cli_php = getenv( 'WP_CLI_PHP' ) ) {
-		return $wp_cli_php;
+	if ( $ee_php = getenv( 'EE_PHP' ) ) {
+		return $ee_php;
 	}
 
 	// Available since PHP 5.4.

@@ -4,7 +4,7 @@
 
 set -ex
 
-WP_CLI_BIN_DIR=${WP_CLI_BIN_DIR-/tmp/wp-cli-phar}
+EE_BIN_DIR=${EE_BIN_DIR-/tmp/ee-phar}
 
 # Disable XDebug to speed up Composer and test suites.
 if [ -f ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/xdebug.ini ]; then
@@ -23,18 +23,18 @@ then
 	CLI_VERSION="$CLI_VERSION-$GIT_SHORT_HASH"
 fi
 
-# the Behat test suite will pick up the executable found in $WP_CLI_BIN_DIR
+# the Behat test suite will pick up the executable found in $EE_BIN_DIR
 if [[ $BUILD == 'git' || $BUILD == 'sniff' ]]
 then
 	echo $CLI_VERSION > VERSION
 else
-	mkdir -p $WP_CLI_BIN_DIR
-	php -dphar.readonly=0 utils/make-phar.php wp-cli.phar --quiet --version=$CLI_VERSION
-	mv wp-cli.phar $WP_CLI_BIN_DIR/wp
-	chmod +x $WP_CLI_BIN_DIR/wp
+	mkdir -p $EE_BIN_DIR
+	php -dphar.readonly=0 utils/make-phar.php ee.phar --quiet --version=$CLI_VERSION
+	mv ee.phar $EE_BIN_DIR/wp
+	chmod +x $EE_BIN_DIR/wp
 fi
 
 echo $CLI_VERSION > PHAR_BUILD_VERSION
 
-mysql -e 'CREATE DATABASE wp_cli_test;' -uroot
-mysql -e 'GRANT ALL PRIVILEGES ON wp_cli_test.* TO "wp_cli_test"@"localhost" IDENTIFIED BY "password1"' -uroot
+mysql -e 'CREATE DATABASE ee_test;' -uroot
+mysql -e 'GRANT ALL PRIVILEGES ON ee_test.* TO "ee_test"@"localhost" IDENTIFIED BY "password1"' -uroot

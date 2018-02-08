@@ -1,4 +1,4 @@
-Feature: Get help about WP-CLI commands
+Feature: Get help about EE commands
 
   Scenario: Help for internal commands
     Given an empty directory
@@ -138,7 +138,7 @@ Feature: Get help about WP-CLI commands
     Then the return code should be 1
     And STDERR should be:
       """
-      Warning: Can’t select database. We were able to connect to the database server (which means your username and password is okay) but not able to select the `wp_cli_test` database.
+      Warning: Can’t select database. We were able to connect to the database server (which means your username and password is okay) but not able to select the `ee_test` database.
       Error: 'non-existent-command' is not a registered wp command. See 'wp help' for available commands.
       """
     And STDOUT should be empty
@@ -153,7 +153,7 @@ Feature: Get help about WP-CLI commands
     Then the return code should be 1
     And STDERR should be:
       """
-      Error: Can’t select database. We were able to connect to the database server (which means your username and password is okay) but not able to select the `wp_cli_test` database.
+      Error: Can’t select database. We were able to connect to the database server (which means your username and password is okay) but not able to select the `ee_test` database.
       """
     And STDOUT should be empty
 
@@ -338,7 +338,7 @@ Feature: Get help about WP-CLI commands
 
   Scenario: No WordPress install warning or suggestions for disabled commands
     Given an empty directory
-    And a wp-cli.yml file:
+    And a ee.yml file:
       """
       disabled_commands:
         db
@@ -367,14 +367,14 @@ Feature: Get help about WP-CLI commands
       <?php
       // Plugin Name: Test CLI Help
 
-      class Test_Help extends WP_CLI_Command {
+      class Test_Help extends EE_Command {
         /**
          * A dummy command.
          */
         function __invoke() {}
       }
 
-      WP_CLI::add_command( 'test-help', 'Test_Help' );
+      EE::add_command( 'test-help', 'Test_Help' );
       """
     And I run `wp plugin activate test-cli`
 
@@ -408,7 +408,7 @@ Feature: Get help about WP-CLI commands
       <?php
       // Plugin Name: Test CLI Help
 
-      class Test_Magic_Methods extends WP_CLI_Command {
+      class Test_Magic_Methods extends EE_Command {
         /**
          * A dummy command.
          *
@@ -434,7 +434,7 @@ Feature: Get help about WP-CLI commands
         function __debugInfo() {}
       }
 
-      WP_CLI::add_command( 'test-magic-methods', 'Test_Magic_Methods' );
+      EE::add_command( 'test-magic-methods', 'Test_Magic_Methods' );
       """
     And I run `wp plugin activate test-cli`
 
@@ -455,7 +455,7 @@ Feature: Get help about WP-CLI commands
       <?php
       // Plugin Name: Test CLI Extra Site Command
 
-      class Test_CLI_Extra_Site_Command extends WP_CLI_Command {
+      class Test_CLI_Extra_Site_Command extends EE_Command {
 
         /**
          * A dummy command.
@@ -466,7 +466,7 @@ Feature: Get help about WP-CLI commands
 
       }
 
-      WP_CLI::add_command( 'site test-extra', 'Test_CLI_Extra_Site_Command' );
+      EE::add_command( 'site test-extra', 'Test_CLI_Extra_Site_Command' );
       """
     And I run `wp plugin activate test-cli`
 
@@ -481,7 +481,7 @@ Feature: Get help about WP-CLI commands
       <?php
       // Plugin Name: Test CLI Extra Command
 
-      class Test_CLI_Extra_Command extends WP_CLI_Command {
+      class Test_CLI_Extra_Command extends EE_Command {
 
         /**
          * A dummy command.
@@ -492,9 +492,9 @@ Feature: Get help about WP-CLI commands
 
       }
 
-      WP_CLI::add_command( 'config test-extra-config', 'Test_CLI_Extra_Command' );
-      WP_CLI::add_command( 'core test-extra-core', 'Test_CLI_Extra_Command' );
-      WP_CLI::add_command( 'db test-extra-db', 'Test_CLI_Extra_Command' );
+      EE::add_command( 'config test-extra-config', 'Test_CLI_Extra_Command' );
+      EE::add_command( 'core test-extra-core', 'Test_CLI_Extra_Command' );
+      EE::add_command( 'db test-extra-db', 'Test_CLI_Extra_Command' );
       """
 
     When I run `wp help config`
@@ -572,7 +572,7 @@ Feature: Get help about WP-CLI commands
       <?php
       // Plugin Name: Test CLI Help
 
-      class Test_Wordwrap extends WP_CLI_Command {
+      class Test_Wordwrap extends EE_Command {
         /**
          * 123456789 123456789 123456789 123456789 123456789 123456789 123456789 12345678
          *
@@ -616,7 +616,7 @@ Feature: Get help about WP-CLI commands
         function my_command() {}
       }
 
-      WP_CLI::add_command( 'test-wordwrap', 'Test_Wordwrap' );
+      EE::add_command( 'test-wordwrap', 'Test_Wordwrap' );
       """
     And I run `wp plugin activate test-cli`
 
@@ -793,7 +793,7 @@ Feature: Get help about WP-CLI commands
       <?php
       // Plugin Name: Test CLI Help
 
-      class Test_Wordwrap extends WP_CLI_Command {
+      class Test_Wordwrap extends EE_Command {
         /**
          * Generate PHP code for registering a custom post type.
          *
@@ -862,7 +862,7 @@ Feature: Get help about WP-CLI commands
         public function very_long( $args, $assoc_args ) {}
       }
 
-      WP_CLI::add_command( 'test-wordwrap', 'Test_Wordwrap' );
+      EE::add_command( 'test-wordwrap', 'Test_Wordwrap' );
       """
     And I run `wp plugin activate test-cli`
 
@@ -904,16 +904,16 @@ Feature: Get help about WP-CLI commands
       """
       <?php
 
-      if ( ! defined( 'WP_CLI' ) || ! WP_CLI ) {
+      if ( ! defined( 'EE' ) || ! EE ) {
           return;
       }
 
-      class WP_CLI_Foo_Bar_Command extends WP_CLI_Command {
+      class EE_Foo_Bar_Command extends EE_Command {
           /**
           * A command that has a link in its long description.
           *
           * This is a [reference link](https://wordpress.org/).
-          * Also, there is a [second link](http://wp-cli.org/).
+          * Also, there is a [second link](http://ee.org/).
           * They should be displayed nicely!
           *
           * @synopsis <constant-name>
@@ -921,9 +921,9 @@ Feature: Get help about WP-CLI commands
           public function __invoke( $args, $assoc_args ) {}
       }
 
-      WP_CLI::add_command( 'reference-link', 'WP_CLI_Foo_Bar_Command' );
+      EE::add_command( 'reference-link', 'EE_Foo_Bar_Command' );
       """
-    And a wp-cli.yml file:
+    And a ee.yml file:
       """
       require:
         - command.php
@@ -938,7 +938,7 @@ Feature: Get help about WP-CLI commands
 
         ---
         [1] https://wordpress.org/
-        [2] http://wp-cli.org/
+        [2] http://ee.org/
       """
 
     When I run `wp help role`
@@ -957,24 +957,24 @@ Feature: Get help about WP-CLI commands
       """
       <?php
 
-      if ( ! defined( 'WP_CLI' ) || ! WP_CLI ) {
+      if ( ! defined( 'EE' ) || ! EE ) {
           return;
       }
 
-      class WP_CLI_Foo_Bar_Command extends WP_CLI_Command {
+      class EE_Foo_Bar_Command extends EE_Command {
           /**
           * A command that has a link in its long description.
           *
-          * This is a [reference link](https://wordpress.org/). Also, there is a [second link](http://wp-cli.org/). They should be displayed nicely! Wow! This is a very, very long description.
+          * This is a [reference link](https://wordpress.org/). Also, there is a [second link](http://ee.org/). They should be displayed nicely! Wow! This is a very, very long description.
           *
           * @synopsis <constant-name>
           */
           public function __invoke( $args, $assoc_args ) {}
       }
 
-      WP_CLI::add_command( 'reference-link', 'WP_CLI_Foo_Bar_Command' );
+      EE::add_command( 'reference-link', 'EE_Foo_Bar_Command' );
       """
-    And a wp-cli.yml file:
+    And a ee.yml file:
       """
       require:
         - command.php
@@ -988,7 +988,7 @@ Feature: Get help about WP-CLI commands
 
         ---
         [1] https://wordpress.org/
-        [2] http://wp-cli.org/
+        [2] http://ee.org/
       """
 
     When I run `TERM=vt100 COLUMNS=60 wp help reference-link`
@@ -1000,12 +1000,12 @@ Feature: Get help about WP-CLI commands
 
         ---
         [1] https://wordpress.org/
-        [2] http://wp-cli.org/
+        [2] http://ee.org/
       """
 
   Scenario Outline: Check that proc_open() and proc_close() aren't disabled for help pager
     Given an empty directory
-    When I try `{INVOKE_WP_CLI_WITH_PHP_ARGS--ddisable_functions=<func>} help --debug`
+    When I try `{INVOKE_EE_WITH_PHP_ARGS--ddisable_functions=<func>} help --debug`
     Then STDERR should contain:
       """
       Warning: check_proc_available() failed in pass_through_pager().

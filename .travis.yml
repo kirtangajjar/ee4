@@ -6,7 +6,7 @@ php: 7.1
 
 env:
   global:
-    - WP_CLI_BIN_DIR=/tmp/wp-cli-phar
+    - EE_BIN_DIR=/tmp/ee-phar
 
 before_script:
   - export PATH="$HOME/.composer/vendor/bin:$PATH"
@@ -40,7 +40,7 @@ jobs:
     - stage: test
       script: ./ci/test.sh
       php: 5.6
-      env: WP_VERSION=latest BUILD=git WP_CLI_BIN_DIR=''
+      env: WP_VERSION=latest BUILD=git EE_BIN_DIR=''
     - stage: test
       script: ./ci/test.sh
       php: 5.6

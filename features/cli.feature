@@ -1,13 +1,13 @@
 Feature: `wp cli` tasks
 
-  Scenario: Ability to detect a WP-CLI registered command
+  Scenario: Ability to detect a EE registered command
     Given a WP installation
 
-    When I run `wp package install wp-cli/scaffold-package-command`
+    When I run `wp package install ee/scaffold-package-command`
     When I run `wp cli has-command scaffold package`
     Then the return code should be 0
 
-    When I run `wp package uninstall wp-cli/scaffold-package-command`
+    When I run `wp package uninstall ee/scaffold-package-command`
     When I try `wp cli has-command scaffold package`
     Then the return code should be 1
 
@@ -21,7 +21,7 @@ Feature: `wp cli` tasks
       class TestCommand {
       }
 
-      WP_CLI::add_command( 'test-command', 'TestCommand' );
+      EE::add_command( 'test-command', 'TestCommand' );
       """
 
     When I run `wp cli has-command test-command`
@@ -35,7 +35,7 @@ Feature: `wp cli` tasks
     When I run `{PHAR_PATH} cli version`
     Then STDOUT should be:
     """
-    WP-CLI 1.2.3
+    EE 1.2.3
     """
     And the {SRC_DIR}/VERSION file should be:
     """
@@ -55,14 +55,14 @@ Feature: `wp cli` tasks
     And STDERR should be empty
 
   @github-api
-  Scenario: Do WP-CLI Update
+  Scenario: Do EE Update
     Given an empty directory
     And a new Phar with version "0.0.0"
 
     When I run `{PHAR_PATH} --info`
     Then STDOUT should contain:
       """
-      WP-CLI version
+      EE version
       """
     And STDOUT should contain:
       """
@@ -84,7 +84,7 @@ Feature: `wp cli` tasks
     When I run `{PHAR_PATH} --info`
     Then STDOUT should contain:
       """
-      WP-CLI version
+      EE version
       """
     And STDOUT should not contain:
       """
@@ -94,7 +94,7 @@ Feature: `wp cli` tasks
     When I run `{PHAR_PATH} cli update`
     Then STDOUT should be:
       """
-      Success: WP-CLI is at the latest version.
+      Success: EE is at the latest version.
       """
 
   @github-api
@@ -105,7 +105,7 @@ Feature: `wp cli` tasks
     When I run `{PHAR_PATH} --version`
     Then STDOUT should be:
       """
-      WP-CLI 0.14.0
+      EE 0.14.0
       """
 
     When I run `{PHAR_PATH} cli update --patch --yes`
@@ -115,7 +115,7 @@ Feature: `wp cli` tasks
       """
     And STDOUT should contain:
       """
-      Success: Updated WP-CLI to 0.14.1
+      Success: Updated EE to 0.14.1
       """
     And STDERR should be empty
     And the return code should be 0
@@ -123,7 +123,7 @@ Feature: `wp cli` tasks
     When I run `{PHAR_PATH} --version`
     Then STDOUT should be:
       """
-      WP-CLI 0.14.1
+      EE 0.14.1
       """
 
   @github-api
@@ -144,7 +144,7 @@ Feature: `wp cli` tasks
     And the return code should be 0
 
   @require-php-5.6
-  Scenario: Install WP-CLI nightly
+  Scenario: Install EE nightly
     Given an empty directory
     And a new Phar with version "0.14.0"
 
@@ -155,14 +155,14 @@ Feature: `wp cli` tasks
       """
     And STDOUT should contain:
       """
-      Success: Updated WP-CLI to the latest nightly release.
+      Success: Updated EE to the latest nightly release.
       """
 
     And STDERR should be empty
     And the return code should be 0
 
   @github-api
-  Scenario: Install WP-CLI stable
+  Scenario: Install EE stable
     Given an empty directory
     And a new Phar with version "0.14.0"
     And a session file:
@@ -185,7 +185,7 @@ Feature: `wp cli` tasks
       """
     And STDOUT should contain:
       """
-      Success: Updated WP-CLI to the latest stable release.
+      Success: Updated EE to the latest stable release.
       """
     And STDERR should be empty
     And the return code should be 0
@@ -193,13 +193,13 @@ Feature: `wp cli` tasks
     When I run `{PHAR_PATH} cli check-update`
     Then STDOUT should be:
       """
-      Success: WP-CLI is at the latest version.
+      Success: EE is at the latest version.
       """
 
     When I run `{PHAR_PATH} cli version`
     Then STDOUT should be:
       """
-      WP-CLI {UPDATE_VERSION}
+      EE {UPDATE_VERSION}
       """
 
   Scenario: Dump the list of global parameters with values

@@ -8,14 +8,14 @@
  * environment variable.
  */
 
-use WP_CLI\Utils;
+use EE\Utils;
 
 class Contrib_List_Command {
 
 	/**
 	 * List all contributors to this release.
 	 *
-	 * Run within the main WP-CLI project repository.
+	 * Run within the main EE project repository.
 	 *
 	 * ## OPTIONS
 	 *
@@ -37,34 +37,34 @@ class Contrib_List_Command {
 		$pull_request_count = 0;
 
 		// Get the contributors to the current open large project milestones
-		foreach( array( 'wp-cli/wp-cli', 'wp-cli/handbook', 'wp-cli/wp-cli.github.com' ) as $repo ) {
+		foreach( array( 'ee/ee', 'ee/handbook', 'ee/ee.github.com' ) as $repo ) {
 			$milestones = self::get_project_milestones( $repo );
 			// Cheap way to get the latest milestone
 			$milestone = array_shift( $milestones );
-			WP_CLI::log( 'Current open ' . $repo . ' milestone: ' . $milestone->title );
+			EE::log( 'Current open ' . $repo . ' milestone: ' . $milestone->title );
 			$pull_requests = self::get_project_milestone_pull_requests( $repo, $milestone->number );
 			$repo_contributors = self::parse_contributors_from_pull_requests( $pull_requests );
-			WP_CLI::log( ' - Contributors: ' . count( $repo_contributors ) );
-			WP_CLI::log( ' - Pull requests: ' . count( $pull_requests ) );
+			EE::log( ' - Contributors: ' . count( $repo_contributors ) );
+			EE::log( ' - Pull requests: ' . count( $pull_requests ) );
 			$pull_request_count += count( $pull_requests );
 			$contributors = array_merge( $contributors, $repo_contributors );
 		}
 
 		// Identify all command dependencies and their contributors
-		$milestones = self::get_project_milestones( 'wp-cli/wp-cli', array( 'state' => 'closed' ) );
+		$milestones = self::get_project_milestones( 'ee/ee', array( 'state' => 'closed' ) );
 		// Cheap way to get the latest closed milestone
 		$milestone = array_shift( $milestones );
-		$composer_lock_url = sprintf( 'https://raw.githubusercontent.com/wp-cli/wp-cli/v%s/composer.lock', $milestone->title );
-		WP_CLI::log( 'Fetching ' . $composer_lock_url );
+		$composer_lock_url = sprintf( 'https://raw.githubusercontent.com/ee/ee/v%s/composer.lock', $milestone->title );
+		EE::log( 'Fetching ' . $composer_lock_url );
 		$response = Utils\http_request( 'GET', $composer_lock_url );
 		if ( 200 !== $response->status_code ) {
-			WP_CLI::error( sprintf( 'Could not fetch composer.json (HTTP code %d)', $response->status_code ) );
+			EE::error( sprintf( 'Could not fetch composer.json (HTTP code %d)', $response->status_code ) );
 		}
 		$composer_json = json_decode( $response->body, true );
 		foreach( $composer_json['packages'] as $package ) {
 			$package_name = $package['name'];
 			$version_constraint = str_replace( 'v', '', $package['version'] );
-			if ( ! preg_match( '#^wp-cli/.+-command$#', $package_name ) ) {
+			if ( ! preg_match( '#^ee/.+-command$#', $package_name ) ) {
 				continue;
 			}
 			// Closed milestones denote a tagged release
@@ -82,19 +82,19 @@ class Contrib_List_Command {
 			if ( empty( $milestone_ids ) ) {
 				continue;
 			}
-			WP_CLI::log( 'Closed ' . $package_name . ' milestone(s): ' . implode( ', ', $milestone_titles ) );
+			EE::log( 'Closed ' . $package_name . ' milestone(s): ' . implode( ', ', $milestone_titles ) );
 			foreach( $milestone_ids as $milestone_id ) {
 				$pull_requests = self::get_project_milestone_pull_requests( $package_name, $milestone_id );
 				$repo_contributors = self::parse_contributors_from_pull_requests( $pull_requests );
-				WP_CLI::log( ' - Contributors: ' . count( $repo_contributors ) );
-				WP_CLI::log( ' - Pull requests: ' . count( $pull_requests ) );
+				EE::log( ' - Contributors: ' . count( $repo_contributors ) );
+				EE::log( ' - Pull requests: ' . count( $pull_requests ) );
 				$pull_request_count += count( $pull_requests );
 				$contributors = array_merge( $contributors, $repo_contributors );
 			}
 		}
 
-		WP_CLI::log( 'Total contributors: ' . count( $contributors ) );
-		WP_CLI::log( 'Total pull requests: ' . $pull_request_count );
+		EE::log( 'Total contributors: ' . count( $contributors ) );
+		EE::log( 'Total pull requests: ' . $pull_request_count );
 
 		// Sort and render the contributor list
 		asort( $contributors, SORT_NATURAL | SORT_FLAG_CASE );
@@ -108,7 +108,7 @@ class Contrib_List_Command {
 				}
 			}
 			$contrib_list = rtrim( $contrib_list, ', ' );
-			WP_CLI::log( $contrib_list );
+			EE::log( $contrib_list );
 		}
 	}
 
@@ -188,18 +188,18 @@ class Contrib_List_Command {
 	private static function make_github_api_request( $url, $args = array() ) {
 		$headers = array(
 			'Accept'     => 'application/vnd.github.v3+json',
-			'User-Agent' => 'WP-CLI',
+			'User-Agent' => 'EE',
 		);
 		if ( $token = getenv( 'GITHUB_TOKEN' ) ) {
 			$headers['Authorization'] = 'token ' . $token;
 		}
 		$response = Utils\http_request( 'GET', $url, $args, $headers );
 		if ( 200 !== $response->status_code ) {
-			WP_CLI::error( sprintf( 'GitHub API returned: %s (HTTP code %d)', $response->body, $response->status_code ) );
+			EE::error( sprintf( 'GitHub API returned: %s (HTTP code %d)', $response->body, $response->status_code ) );
 		}
 		return array( json_decode( $response->body ), $response->headers );
 	}
 
 }
 
-WP_CLI::add_command( 'contrib-list', 'Contrib_List_Command' );
+EE::add_command( 'contrib-list', 'Contrib_List_Command' );

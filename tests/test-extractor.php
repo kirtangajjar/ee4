@@ -1,11 +1,11 @@
 <?php
 
-use WP_CLI\Extractor;
-use WP_CLI\Utils;
+use EE\Extractor;
+use EE\Utils;
 
 class Extractor_Test extends PHPUnit_Framework_TestCase {
 
-	static $copy_overwrite_files_prefix = 'wp-cli-test-utils-copy-overwrite-files-';
+	static $copy_overwrite_files_prefix = 'ee-test-utils-copy-overwrite-files-';
 
 	static $expected_wp = array(
 		'index1.php',
@@ -28,12 +28,12 @@ class Extractor_Test extends PHPUnit_Framework_TestCase {
 		parent::setUp();
 
 		// Save and set logger.
-		$class_wp_cli_logger = new \ReflectionProperty( 'WP_CLI', 'logger' );
-		$class_wp_cli_logger->setAccessible( true );
-		self::$prev_logger = $class_wp_cli_logger->getValue();
+		$class_ee_logger = new \ReflectionProperty( 'EE', 'logger' );
+		$class_ee_logger->setAccessible( true );
+		self::$prev_logger = $class_ee_logger->getValue();
 
-		self::$logger = new \WP_CLI\Loggers\Execution;
-		WP_CLI::set_logger( self::$logger );
+		self::$logger = new \EE\Loggers\Execution;
+		EE::set_logger( self::$logger );
 
 		// Remove any failed tests detritus.
 		$temp_dirs = Utils\get_temp_dir() . self::$copy_overwrite_files_prefix . '*';
@@ -44,7 +44,7 @@ class Extractor_Test extends PHPUnit_Framework_TestCase {
 
 	public function tearDown() {
 		// Restore logger.
-		WP_CLI::set_logger( self::$prev_logger );
+		EE::set_logger( self::$prev_logger );
 
 		parent::tearDown();
 	}

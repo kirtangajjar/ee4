@@ -1,4 +1,4 @@
-Feature: Tests `WP_CLI::add_hook()`
+Feature: Tests `EE::add_hook()`
 
   Scenario: Add callback to the `before_invoke`
     Given a WP installation
@@ -6,12 +6,12 @@ Feature: Tests `WP_CLI::add_hook()`
       """
       <?php
       $callback = function() {
-        WP_CLI::log( '`add_hook()` to the `before_invoke` is working.');
+        EE::log( '`add_hook()` to the `before_invoke` is working.');
       };
 
-      WP_CLI::add_hook( 'before_invoke:plugin list', $callback );
+      EE::add_hook( 'before_invoke:plugin list', $callback );
       """
-    And a wp-cli.yml file:
+    And a ee.yml file:
       """
       require:
         - before-invoke.php
@@ -30,12 +30,12 @@ Feature: Tests `WP_CLI::add_hook()`
       """
       <?php
       $callback = function() {
-        WP_CLI::log( '`add_hook()` to the `before_invoke` is working.');
+        EE::log( '`add_hook()` to the `before_invoke` is working.');
       };
 
-      WP_CLI::add_hook( 'before_invoke:db check', $callback );
+      EE::add_hook( 'before_invoke:db check', $callback );
       """
-    And a wp-cli.yml file:
+    And a ee.yml file:
       """
       require:
         - before-invoke.php
@@ -54,12 +54,12 @@ Feature: Tests `WP_CLI::add_hook()`
       """
       <?php
       $callback = function() {
-        WP_CLI::log( '`add_hook()` to the `before_invoke` is working.');
+        EE::log( '`add_hook()` to the `before_invoke` is working.');
       };
 
-      WP_CLI::add_hook( 'before_invoke:core version', $callback );
+      EE::add_hook( 'before_invoke:core version', $callback );
       """
-    And a wp-cli.yml file:
+    And a ee.yml file:
       """
       require:
         - before-invoke.php

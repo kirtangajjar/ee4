@@ -1,31 +1,31 @@
 <?php
 
 use \Composer\Semver\Comparator;
-use \WP_CLI\Utils;
+use \EE\Utils;
 
 /**
- * Review current WP-CLI info, check for updates, or see defined aliases.
+ * Review current EE info, check for updates, or see defined aliases.
  *
  * ## EXAMPLES
  *
  *     # Display the version currently installed.
  *     $ wp cli version
- *     WP-CLI 0.24.1
+ *     EE 0.24.1
  *
- *     # Check for updates to WP-CLI.
+ *     # Check for updates to EE.
  *     $ wp cli check-update
- *     Success: WP-CLI is at the latest version.
+ *     Success: EE is at the latest version.
  *
- *     # Update WP-CLI to the latest stable release.
+ *     # Update EE to the latest stable release.
  *     $ wp cli update
  *     You have version 0.24.0. Would you like to update to 0.24.1? [y/n] y
- *     Downloading from https://github.com/wp-cli/wp-cli/releases/download/v0.24.1/wp-cli-0.24.1.phar...
+ *     Downloading from https://github.com/ee/ee/releases/download/v0.24.1/ee-0.24.1.phar...
  *     New version works. Proceeding to replace.
- *     Success: Updated WP-CLI to 0.24.1.
+ *     Success: Updated EE to 0.24.1.
  *
  * @when before_wp_load
  */
-class CLI_Command extends WP_CLI_Command {
+class CLI_Command extends EE_Command {
 
 	private function command_to_array( $command ) {
 		$dump = array(
@@ -46,20 +46,20 @@ class CLI_Command extends WP_CLI_Command {
 	}
 
 	/**
-	 * Print WP-CLI version.
+	 * Print EE version.
 	 *
 	 * ## EXAMPLES
 	 *
 	 *     # Display CLI version.
 	 *     $ wp cli version
-	 *     WP-CLI 0.24.1
+	 *     EE 0.24.1
 	 */
 	public function version() {
-		WP_CLI::line( 'WP-CLI ' . WP_CLI_VERSION );
+		EE::line( 'EE ' . EE_VERSION );
 	}
 
 	/**
-	 * Print various details about the WP-CLI environment.
+	 * Print various details about the EE environment.
 	 *
 	 * Helpful for diagnostic purposes, this command shares:
 	 *
@@ -68,12 +68,12 @@ class CLI_Command extends WP_CLI_Command {
 	 * * PHP binary used.
 	 * * PHP binary version.
 	 * * php.ini configuration file used (which is typically different than web).
-	 * * WP-CLI root dir: where WP-CLI is installed (if non-Phar install).
-	 * * WP-CLI global config: where the global config YAML file is located.
-	 * * WP-CLI project config: where the project config YAML file is located.
-	 * * WP-CLI version: currently installed version.
+	 * * EE root dir: where EE is installed (if non-Phar install).
+	 * * EE global config: where the global config YAML file is located.
+	 * * EE project config: where the project config YAML file is located.
+	 * * EE version: currently installed version.
 	 *
-	 * See [config docs](https://wp-cli.org/config/) for more details on global
+	 * See [config docs](https://ee.org/config/) for more details on global
 	 * and project config YAML files.
 	 *
 	 * ## OPTIONS
@@ -96,11 +96,11 @@ class CLI_Command extends WP_CLI_Command {
 	 *     PHP binary:  /usr/bin/php
 	 *     PHP version: 7.1.12-1+ubuntu16.04.1+deb.sury.org+1
 	 *     php.ini used:    /etc/php/7.1/cli/php.ini
-	 *     WP-CLI root dir:    phar://wp-cli.phar
-	 *     WP-CLI packages dir:    /home/person/.wp-cli/packages/
-	 *     WP-CLI global config:
-	 *     WP-CLI project config:
-	 *     WP-CLI version: 1.5.0
+	 *     EE root dir:    phar://ee.phar
+	 *     EE packages dir:    /home/person/.ee/packages/
+	 *     EE global config:
+	 *     EE project config:
+	 *     EE version: 1.5.0
 	 */
 	public function info( $_, $assoc_args ) {
 		$php_bin = Utils\get_php_binary();
@@ -110,43 +110,43 @@ class CLI_Command extends WP_CLI_Command {
 		if ( ! $shell && Utils\is_windows() ) {
 			$shell = getenv( 'ComSpec' );
 		}
-		$runner = WP_CLI::get_runner();
+		$runner = EE::get_runner();
 
 		$packages_dir = $runner->get_packages_dir_path();
 		if ( ! is_dir( $packages_dir ) ) {
 			$packages_dir = null;
 		}
-		if ( \WP_CLI\Utils\get_flag_value( $assoc_args, 'format' ) === 'json' ) {
+		if ( \EE\Utils\get_flag_value( $assoc_args, 'format' ) === 'json' ) {
 			$info = array(
 				'php_binary_path'          => $php_bin,
 				'global_config_path'       => $runner->global_config_path,
 				'project_config_path'      => $runner->project_config_path,
-				'wp_cli_dir_path'          => WP_CLI_ROOT,
-				'wp_cli_packages_dir_path' => $packages_dir,
-				'wp_cli_version'           => WP_CLI_VERSION,
+				'ee_dir_path'          => EE_ROOT,
+				'ee_packages_dir_path' => $packages_dir,
+				'ee_version'           => EE_VERSION,
 				'system_os'                => $system_os,
 				'shell'                    => $shell,
 			);
 
-			WP_CLI::line( json_encode( $info ) );
+			EE::line( json_encode( $info ) );
 		} else {
-			WP_CLI::line( "OS:\t" . $system_os );
-			WP_CLI::line( "Shell:\t" . $shell );
-			WP_CLI::line( "PHP binary:\t" . $php_bin );
-			WP_CLI::line( "PHP version:\t" . PHP_VERSION );
-			WP_CLI::line( "php.ini used:\t" . get_cfg_var( 'cfg_file_path' ) );
-			WP_CLI::line( "WP-CLI root dir:\t" . WP_CLI_ROOT );
-			WP_CLI::line( "WP-CLI vendor dir:\t" . WP_CLI_VENDOR_DIR );
-			WP_CLI::line( "WP_CLI phar path:\t" . ( defined( 'WP_CLI_PHAR_PATH' ) ? WP_CLI_PHAR_PATH : '' ) );
-			WP_CLI::line( "WP-CLI packages dir:\t" . $packages_dir );
-			WP_CLI::line( "WP-CLI global config:\t" . $runner->global_config_path );
-			WP_CLI::line( "WP-CLI project config:\t" . $runner->project_config_path );
-			WP_CLI::line( "WP-CLI version:\t" . WP_CLI_VERSION );
+			EE::line( "OS:\t" . $system_os );
+			EE::line( "Shell:\t" . $shell );
+			EE::line( "PHP binary:\t" . $php_bin );
+			EE::line( "PHP version:\t" . PHP_VERSION );
+			EE::line( "php.ini used:\t" . get_cfg_var( 'cfg_file_path' ) );
+			EE::line( "EE root dir:\t" . EE_ROOT );
+			EE::line( "EE vendor dir:\t" . EE_VENDOR_DIR );
+			EE::line( "EE phar path:\t" . ( defined( 'EE_PHAR_PATH' ) ? EE_PHAR_PATH : '' ) );
+			EE::line( "EE packages dir:\t" . $packages_dir );
+			EE::line( "EE global config:\t" . $runner->global_config_path );
+			EE::line( "EE project config:\t" . $runner->project_config_path );
+			EE::line( "EE version:\t" . EE_VERSION );
 		}
 	}
 
 	/**
-	 * Check to see if there is a newer version of WP-CLI available.
+	 * Check to see if there is a newer version of EE available.
 	 *
 	 * Queries the Github releases API. Returns available versions if there are
 	 * updates available, or success message if using the latest release.
@@ -184,14 +184,14 @@ class CLI_Command extends WP_CLI_Command {
 	 *
 	 *     # Check for update.
 	 *     $ wp cli check-update
-	 *     Success: WP-CLI is at the latest version.
+	 *     Success: EE is at the latest version.
 	 *
 	 *     # Check for update and new version is available.
 	 *     $ wp cli check-update
 	 *     +---------+-------------+-------------------------------------------------------------------------------+
 	 *     | version | update_type | package_url                                                                   |
 	 *     +---------+-------------+-------------------------------------------------------------------------------+
-	 *     | 0.24.1  | patch       | https://github.com/wp-cli/wp-cli/releases/download/v0.24.1/wp-cli-0.24.1.phar |
+	 *     | 0.24.1  | patch       | https://github.com/ee/ee/releases/download/v0.24.1/ee-0.24.1.phar |
 	 *     +---------+-------------+-------------------------------------------------------------------------------+
 	 *
 	 * @subcommand check-update
@@ -200,19 +200,19 @@ class CLI_Command extends WP_CLI_Command {
 		$updates = $this->get_updates( $assoc_args );
 
 		if ( $updates ) {
-			$formatter = new \WP_CLI\Formatter(
+			$formatter = new \EE\Formatter(
 				$assoc_args,
 				array( 'version', 'update_type', 'package_url' )
 			);
 			$formatter->display_items( $updates );
 		} elseif ( empty( $assoc_args['format'] ) || 'table' == $assoc_args['format'] ) {
 			$update_type = $this->get_update_type_str( $assoc_args );
-			WP_CLI::success( "WP-CLI is at the latest{$update_type}version." );
+			EE::success( "EE is at the latest{$update_type}version." );
 		}
 	}
 
 	/**
-	 * Update WP-CLI to the latest release.
+	 * Update EE to the latest release.
 	 *
 	 * Default behavior is to check the releases API for the newest stable
 	 * version, and prompt if one is available.
@@ -251,52 +251,52 @@ class CLI_Command extends WP_CLI_Command {
 	 *     # Update CLI.
 	 *     $ wp cli update
 	 *     You have version 0.24.0. Would you like to update to 0.24.1? [y/n] y
-	 *     Downloading from https://github.com/wp-cli/wp-cli/releases/download/v0.24.1/wp-cli-0.24.1.phar...
+	 *     Downloading from https://github.com/ee/ee/releases/download/v0.24.1/ee-0.24.1.phar...
 	 *     New version works. Proceeding to replace.
-	 *     Success: Updated WP-CLI to 0.24.1.
+	 *     Success: Updated EE to 0.24.1.
 	 */
 	public function update( $_, $assoc_args ) {
 		if ( ! Utils\inside_phar() ) {
-			WP_CLI::error( 'You can only self-update Phar files.' );
+			EE::error( 'You can only self-update Phar files.' );
 		}
 
 		$old_phar = realpath( $_SERVER['argv'][0] );
 
 		if ( ! is_writable( $old_phar ) ) {
-			WP_CLI::error( sprintf( '%s is not writable by current user.', $old_phar ) );
+			EE::error( sprintf( '%s is not writable by current user.', $old_phar ) );
 		} elseif ( ! is_writable( dirname( $old_phar ) ) ) {
-			WP_CLI::error( sprintf( '%s is not writable by current user.', dirname( $old_phar ) ) );
+			EE::error( sprintf( '%s is not writable by current user.', dirname( $old_phar ) ) );
 		}
 
 		if ( Utils\get_flag_value( $assoc_args, 'nightly' ) ) {
-			WP_CLI::confirm( sprintf( 'You have version %s. Would you like to update to the latest nightly?', WP_CLI_VERSION ), $assoc_args );
-			$download_url = 'https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli-nightly.phar';
-			$md5_url = 'https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli-nightly.phar.md5';
+			EE::confirm( sprintf( 'You have version %s. Would you like to update to the latest nightly?', EE_VERSION ), $assoc_args );
+			$download_url = 'https://raw.githubusercontent.com/ee/builds/gh-pages/phar/ee-nightly.phar';
+			$md5_url = 'https://raw.githubusercontent.com/ee/builds/gh-pages/phar/ee-nightly.phar.md5';
 		} elseif ( Utils\get_flag_value( $assoc_args, 'stable' ) ) {
-			WP_CLI::confirm( sprintf( 'You have version %s. Would you like to update to the latest stable release?', WP_CLI_VERSION ), $assoc_args );
-			$download_url = 'https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar';
-			$md5_url = 'https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar.md5';
+			EE::confirm( sprintf( 'You have version %s. Would you like to update to the latest stable release?', EE_VERSION ), $assoc_args );
+			$download_url = 'https://raw.githubusercontent.com/ee/builds/gh-pages/phar/ee.phar';
+			$md5_url = 'https://raw.githubusercontent.com/ee/builds/gh-pages/phar/ee.phar.md5';
 		} else {
 
 			$updates = $this->get_updates( $assoc_args );
 
 			if ( empty( $updates ) ) {
 				$update_type = $this->get_update_type_str( $assoc_args );
-				WP_CLI::success( "WP-CLI is at the latest{$update_type}version." );
+				EE::success( "EE is at the latest{$update_type}version." );
 				return;
 			}
 
 			$newest = $updates[0];
 
-			WP_CLI::confirm( sprintf( 'You have version %s. Would you like to update to %s?', WP_CLI_VERSION, $newest['version'] ), $assoc_args );
+			EE::confirm( sprintf( 'You have version %s. Would you like to update to %s?', EE_VERSION, $newest['version'] ), $assoc_args );
 
 			$download_url = $newest['package_url'];
 			$md5_url = str_replace( '.phar', '.phar.md5', $download_url );
 		}
 
-		WP_CLI::log( sprintf( 'Downloading from %s...', $download_url ) );
+		EE::log( sprintf( 'Downloading from %s...', $download_url ) );
 
-		$temp = \WP_CLI\Utils\get_temp_dir() . uniqid( 'wp_', true ) . '.phar';
+		$temp = \EE\Utils\get_temp_dir() . uniqid( 'wp_', true ) . '.phar';
 
 		$headers = array();
 		$options = array(
@@ -308,38 +308,38 @@ class CLI_Command extends WP_CLI_Command {
 
 		$md5_response = Utils\http_request( 'GET', $md5_url );
 		if ( 20 != substr( $md5_response->status_code, 0, 2 ) ) {
-			WP_CLI::error( "Couldn't access md5 hash for release (HTTP code {$md5_response->status_code})." );
+			EE::error( "Couldn't access md5 hash for release (HTTP code {$md5_response->status_code})." );
 		}
 		$md5_file = md5_file( $temp );
 		$release_hash = trim( $md5_response->body );
 		if ( $md5_file === $release_hash ) {
-			WP_CLI::log( 'md5 hash verified: ' . $release_hash );
+			EE::log( 'md5 hash verified: ' . $release_hash );
 		} else {
-			WP_CLI::error( "md5 hash for download ({$md5_file}) is different than the release hash ({$release_hash})." );
+			EE::error( "md5 hash for download ({$md5_file}) is different than the release hash ({$release_hash})." );
 		}
 
-		$allow_root = WP_CLI::get_runner()->config['allow-root'] ? '--allow-root' : '';
+		$allow_root = EE::get_runner()->config['allow-root'] ? '--allow-root' : '';
 		$php_binary = Utils\get_php_binary();
-		$process = WP_CLI\Process::create( "{$php_binary} $temp --info {$allow_root}" );
+		$process = EE\Process::create( "{$php_binary} $temp --info {$allow_root}" );
 		$result = $process->run();
-		if ( 0 !== $result->return_code || false === stripos( $result->stdout, 'WP-CLI version:' ) ) {
+		if ( 0 !== $result->return_code || false === stripos( $result->stdout, 'EE version:' ) ) {
 			$multi_line = explode( PHP_EOL, $result->stderr );
-			WP_CLI::error_multi_line( $multi_line );
-			WP_CLI::error( 'The downloaded PHAR is broken, try running wp cli update again.' );
+			EE::error_multi_line( $multi_line );
+			EE::error( 'The downloaded PHAR is broken, try running wp cli update again.' );
 		}
 
-		WP_CLI::log( 'New version works. Proceeding to replace.' );
+		EE::log( 'New version works. Proceeding to replace.' );
 
 		$mode = fileperms( $old_phar ) & 511;
 
 		if ( false === chmod( $temp, $mode ) ) {
-			WP_CLI::error( sprintf( 'Cannot chmod %s.', $temp ) );
+			EE::error( sprintf( 'Cannot chmod %s.', $temp ) );
 		}
 
 		class_exists( '\cli\Colors' ); // This autoloads \cli\Colors - after we move the file we no longer have access to this class.
 
 		if ( false === rename( $temp, $old_phar ) ) {
-			WP_CLI::error( sprintf( 'Cannot move %s to %s', $temp, $old_phar ) );
+			EE::error( sprintf( 'Cannot move %s to %s', $temp, $old_phar ) );
 		}
 
 		if ( Utils\get_flag_value( $assoc_args, 'nightly' ) ) {
@@ -349,14 +349,14 @@ class CLI_Command extends WP_CLI_Command {
 		} else {
 			$updated_version = $newest['version'];
 		}
-		WP_CLI::success( sprintf( 'Updated WP-CLI to %s.', $updated_version ) );
+		EE::success( sprintf( 'Updated EE to %s.', $updated_version ) );
 	}
 
 	/**
 	 * Returns update information.
 	 */
 	private function get_updates( $assoc_args ) {
-		$url = 'https://api.github.com/repos/wp-cli/wp-cli/releases?per_page=100';
+		$url = 'https://api.github.com/repos/ee/ee/releases?per_page=100';
 
 		$options = array(
 			'timeout' => 30,
@@ -372,7 +372,7 @@ class CLI_Command extends WP_CLI_Command {
 		$response = Utils\http_request( 'GET', $url, null, $headers, $options );
 
 		if ( ! $response->success || 200 !== $response->status_code ) {
-			WP_CLI::error( sprintf( 'Failed to get latest version (HTTP code %d).', $response->status_code ) );
+			EE::error( sprintf( 'Failed to get latest version (HTTP code %d).', $response->status_code ) );
 		}
 
 		$release_data = json_decode( $response->body );
@@ -390,7 +390,7 @@ class CLI_Command extends WP_CLI_Command {
 				$release_version = ltrim( $release_version, 'v' );
 			}
 
-			$update_type = Utils\get_named_sem_ver( $release_version, WP_CLI_VERSION );
+			$update_type = Utils\get_named_sem_ver( $release_version, EE_VERSION );
 			if ( ! $update_type ) {
 				continue;
 			}
@@ -413,23 +413,23 @@ class CLI_Command extends WP_CLI_Command {
 		}
 
 		foreach ( array( 'major', 'minor', 'patch' ) as $type ) {
-			if ( true === \WP_CLI\Utils\get_flag_value( $assoc_args, $type ) ) {
+			if ( true === \EE\Utils\get_flag_value( $assoc_args, $type ) ) {
 				return ! empty( $updates[ $type ] ) ? array( $updates[ $type ] ) : false;
 			}
 		}
 
-		if ( empty( $updates ) && preg_match( '#-alpha-(.+)$#', WP_CLI_VERSION, $matches ) ) {
-			$version_url = 'https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/NIGHTLY_VERSION';
+		if ( empty( $updates ) && preg_match( '#-alpha-(.+)$#', EE_VERSION, $matches ) ) {
+			$version_url = 'https://raw.githubusercontent.com/ee/builds/gh-pages/phar/NIGHTLY_VERSION';
 			$response = Utils\http_request( 'GET', $version_url );
 			if ( ! $response->success || 200 !== $response->status_code ) {
-				WP_CLI::error( sprintf( 'Failed to get current nightly version (HTTP code %d)', $response->status_code ) );
+				EE::error( sprintf( 'Failed to get current nightly version (HTTP code %d)', $response->status_code ) );
 			}
 			$nightly_version = trim( $response->body );
-			if ( WP_CLI_VERSION != $nightly_version ) {
+			if ( EE_VERSION != $nightly_version ) {
 				$updates['nightly'] = array(
 					'version'        => $nightly_version,
 					'update_type'    => 'nightly',
-					'package_url'    => 'https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli-nightly.phar',
+					'package_url'    => 'https://raw.githubusercontent.com/ee/builds/gh-pages/phar/ee-nightly.phar',
 				);
 			}
 		}
@@ -474,10 +474,10 @@ class CLI_Command extends WP_CLI_Command {
 	 * @subcommand param-dump
 	 */
 	public function param_dump( $_, $assoc_args ) {
-		$spec = \WP_CLI::get_configurator()->get_spec();
+		$spec = \EE::get_configurator()->get_spec();
 
-		if ( \WP_CLI\Utils\get_flag_value( $assoc_args, 'with-values' ) ) {
-			$config = \WP_CLI::get_configurator()->to_array();
+		if ( \EE\Utils\get_flag_value( $assoc_args, 'with-values' ) ) {
+			$config = \EE::get_configurator()->to_array();
 			// Copy current config values to $spec
 			foreach ( $spec as $key => $value ) {
 				$current = null;
@@ -488,7 +488,7 @@ class CLI_Command extends WP_CLI_Command {
 			}
 		}
 
-		if ( 'var_export' === \WP_CLI\Utils\get_flag_value( $assoc_args, 'format' ) ) {
+		if ( 'var_export' === \EE\Utils\get_flag_value( $assoc_args, 'format' ) ) {
 			var_export( $spec );
 		} else {
 			echo json_encode( $spec );
@@ -507,7 +507,7 @@ class CLI_Command extends WP_CLI_Command {
 	 * @subcommand cmd-dump
 	 */
 	public function cmd_dump() {
-		echo json_encode( $this->command_to_array( WP_CLI::get_root_command() ) );
+		echo json_encode( $this->command_to_array( EE::get_root_command() ) );
 	}
 
 	/**
@@ -530,12 +530,12 @@ class CLI_Command extends WP_CLI_Command {
 	 */
 	public function completions( $_, $assoc_args ) {
 		$line = substr( $assoc_args['line'], 0, $assoc_args['point'] );
-		$compl = new \WP_CLI\Completions( $line );
+		$compl = new \EE\Completions( $line );
 		$compl->render();
 	}
 
 	/**
-	 * List available WP-CLI aliases.
+	 * List available EE aliases.
 	 *
 	 * Aliases are shorthand references to WordPress installs. For instance,
 	 * `@dev` could refer to a development install and `@prod` could refer to
@@ -570,7 +570,7 @@ class CLI_Command extends WP_CLI_Command {
 	 * @alias aliases
 	 */
 	public function alias( $_, $assoc_args ) {
-		WP_CLI::print_value( WP_CLI::get_runner()->aliases, $assoc_args );
+		EE::print_value( EE::get_runner()->aliases, $assoc_args );
 	}
 
 	/**
@@ -579,7 +579,7 @@ class CLI_Command extends WP_CLI_Command {
 	private function get_update_type_str( $assoc_args ) {
 		$update_type = ' ';
 		foreach ( array( 'major', 'minor', 'patch' ) as $type ) {
-			if ( true === \WP_CLI\Utils\get_flag_value( $assoc_args, $type ) ) {
+			if ( true === \EE\Utils\get_flag_value( $assoc_args, $type ) ) {
 				$update_type = ' ' . $type . ' ';
 				break;
 			}
@@ -590,7 +590,7 @@ class CLI_Command extends WP_CLI_Command {
 	/**
 	 * Detects if a command exists
 	 *
-	 * This commands checks if a command is registered with WP-CLI.
+	 * This commands checks if a command is registered with EE.
 	 * If the command is found then it returns with exit status 0.
 	 * If the command doesn't exist, then it will exit with status 1.
 	 *
@@ -619,6 +619,6 @@ class CLI_Command extends WP_CLI_Command {
 		// If command is input as a string, then explode it into array.
 		$command = explode( ' ', implode( ' ', $_ ) );
 
-		WP_CLI::halt( is_array( WP_CLI::get_runner()->find_command_to_run( $command ) ) ? 0 : 1 );
+		EE::halt( is_array( EE::get_runner()->find_command_to_run( $command ) ) ? 0 : 1 );
 	}
 }

@@ -33,14 +33,14 @@ Feature: Format output
           } else {
               $format_args['fields'] = array( 'label', 'slug' );
           }
-          $formatter = new \WP_CLI\Formatter( $format_args );
+          $formatter = new \EE\Formatter( $format_args );
           if ( 'all' === $args[0] ) {
           	  $formatter->display_items( $items );
           } else if ( 'single' === $args[0] ) {
               $formatter->display_item( $items[0] );
           }
       };
-      WP_CLI::add_command( 'yaml', $output_yaml );
+      EE::add_command( 'yaml', $output_yaml );
       """
 
     When I run `wp --require=output-yaml.php yaml all`
@@ -100,7 +100,7 @@ Feature: Format output
         ),
       );
       $assoc_args = array( 'format' => 'csv' );
-      $formatter = new WP_CLI\Formatter( $assoc_args, array( 'id', 'language', 'is_rtl' ) );
+      $formatter = new EE\Formatter( $assoc_args, array( 'id', 'language', 'is_rtl' ) );
       $formatter->display_items( $items );
       """
 
@@ -140,10 +140,10 @@ Feature: Format output
               array( 'package' => Colors::colorize( '%ygaa/gaa-nonsense%n' ), 'version' => 'v3.0.11', 'result' => Colors::colorize( "%r\xf0\x9f\x9b\x87%n" ) ),
               array( 'package' => Colors::colorize( '%ygaa/gaa-100%%new%n' ), 'version' => 'v100%new', 'result' => Colors::colorize( "%g\xe2\x9c\x94%n" ) ),
           );
-          $formatter = new \WP_CLI\Formatter( $assoc_args, array( 'package', 'version', 'result' ) );
+          $formatter = new \EE\Formatter( $assoc_args, array( 'package', 'version', 'result' ) );
           $formatter->display_items( $items, array( true, false, true ) );
       };
-      WP_CLI::add_command( 'fake', $fake_command );
+      EE::add_command( 'fake', $fake_command );
       """
 
     When I run `wp --require=file.php fake`

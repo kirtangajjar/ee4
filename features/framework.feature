@@ -1,4 +1,4 @@
-Feature: Load WP-CLI
+Feature: Load EE
 
   Scenario: A plugin calling wp_signon() shouldn't fatal
     Given a WP installation
@@ -19,25 +19,25 @@ Feature: Load WP-CLI
     And a custom-cmd.php file:
       """
       <?php
-      class Load_WordPress_Command_Class extends WP_CLI_Command {
+      class Load_WordPress_Command_Class extends EE_Command {
 
           /**
            * @when before_wp_load
            */
           public function __invoke() {
               if ( ! function_exists( 'update_option' ) ) {
-                  WP_CLI::log( 'WordPress not loaded.' );
+                  EE::log( 'WordPress not loaded.' );
               }
-              WP_CLI::get_runner()->load_wordpress();
+              EE::get_runner()->load_wordpress();
               if ( function_exists( 'update_option' ) ) {
-                  WP_CLI::log( 'WordPress loaded!' );
+                  EE::log( 'WordPress loaded!' );
               }
-              WP_CLI::get_runner()->load_wordpress();
-              WP_CLI::log( 'load_wordpress() can safely be called twice.' );
+              EE::get_runner()->load_wordpress();
+              EE::log( 'load_wordpress() can safely be called twice.' );
           }
 
       }
-      WP_CLI::add_command( 'load-wordpress', 'Load_WordPress_Command_Class' );
+      EE::add_command( 'load-wordpress', 'Load_WordPress_Command_Class' );
       """
 
     When I run `wp --require=custom-cmd.php load-wordpress`
@@ -53,25 +53,25 @@ Feature: Load WP-CLI
     And a custom-cmd.php file:
       """
       <?php
-      class Load_WordPress_Command_Class extends WP_CLI_Command {
+      class Load_WordPress_Command_Class extends EE_Command {
 
           /**
            * @when before_wp_load
            */
           public function __invoke() {
               if ( ! function_exists( 'update_option' ) ) {
-                  WP_CLI::log( 'WordPress not loaded.' );
+                  EE::log( 'WordPress not loaded.' );
               }
-              WP_CLI::get_runner()->load_wordpress();
+              EE::get_runner()->load_wordpress();
               if ( function_exists( 'update_option' ) ) {
-                  WP_CLI::log( 'WordPress loaded!' );
+                  EE::log( 'WordPress loaded!' );
               }
-              WP_CLI::get_runner()->load_wordpress();
-              WP_CLI::log( 'load_wordpress() can safely be called twice.' );
+              EE::get_runner()->load_wordpress();
+              EE::log( 'load_wordpress() can safely be called twice.' );
           }
 
       }
-      WP_CLI::add_command( 'load-wordpress', 'Load_WordPress_Command_Class' );
+      EE::add_command( 'load-wordpress', 'Load_WordPress_Command_Class' );
       """
 
     When I try `wp --require=custom-cmd.php load-wordpress`
@@ -108,23 +108,23 @@ Feature: Load WP-CLI
       foo
       """
 
-  Scenario: Use a custom error code with WP_CLI::error()
+  Scenario: Use a custom error code with EE::error()
     Given an empty directory
     And a exit-normal.php file:
       """
       <?php
-      WP_CLI::error( 'This is return code 1.' );
+      EE::error( 'This is return code 1.' );
       """
     And a exit-higher.php file:
       """
       <?php
-      WP_CLI::error( 'This is return code 5.', 5 );
+      EE::error( 'This is return code 5.', 5 );
       """
     And a no-exit.php file:
       """
       <?php
-      WP_CLI::error( 'This has no exit.', false );
-      WP_CLI::error( 'So I can use multiple lines.', false );
+      EE::error( 'This has no exit.', false );
+      EE::error( 'So I can use multiple lines.', false );
       """
 
     When I try `wp --require=exit-normal.php`
@@ -200,17 +200,17 @@ Feature: Load WP-CLI
       Error: Error establishing a database connection.
       """
 
-  Scenario: Allow WP_CLI hooks to pass arguments to callbacks
+  Scenario: Allow EE hooks to pass arguments to callbacks
     Given an empty directory
     And a my-command.php file:
       """
       <?php
 
-      WP_CLI::add_hook( 'foo', function( $bar ){
-        WP_CLI::log( $bar );
+      EE::add_hook( 'foo', function( $bar ){
+        EE::log( $bar );
       });
-      WP_CLI::add_command( 'my-command', function( $args ){
-        WP_CLI::do_hook( 'foo', $args[0] );
+      EE::add_command( 'my-command', function( $args ){
+        EE::do_hook( 'foo', $args[0] );
       }, array( 'when' => 'before_wp_load' ) );
       """
 
@@ -221,7 +221,7 @@ Feature: Load WP-CLI
       """
     And STDERR should be empty
 
-  Scenario: WP-CLI sets $table_prefix appropriately on multisite
+  Scenario: EE sets $table_prefix appropriately on multisite
     Given a WP multisite installation
     And I run `wp site create --slug=first`
 

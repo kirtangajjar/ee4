@@ -15,8 +15,8 @@ Feature: Prompt user for input
        *
        * @when before_wp_load
        */
-      WP_CLI::add_command( 'test-prompt', function( $_, $assoc_args ){
-        var_dump( WP_CLI\Utils\get_flag_value( $assoc_args, 'flag' ) );
+      EE::add_command( 'test-prompt', function( $_, $assoc_args ){
+        var_dump( EE\Utils\get_flag_value( $assoc_args, 'flag' ) );
       });
       """
     And a uppercase-session file:
@@ -27,7 +27,7 @@ Feature: Prompt user for input
       """
       y
       """
-    And a wp-cli.yml file:
+    And a ee.yml file:
       """
       require:
         - cmd.php
@@ -66,12 +66,12 @@ Feature: Prompt user for input
        *
        * @when before_wp_load
        */
-      WP_CLI::add_command( 'foobar', function( $_, $assoc_args ) {
-        WP_CLI::line( 'arg: ' . $_[0] );
-        WP_CLI::line( 'flag1: ' . $assoc_args['flag1'] );
+      EE::add_command( 'foobar', function( $_, $assoc_args ) {
+        EE::line( 'arg: ' . $_[0] );
+        EE::line( 'flag1: ' . $assoc_args['flag1'] );
       } );
       """
-    And a wp-cli.yml file:
+    And a ee.yml file:
       """
       require:
         - command-foobar.php

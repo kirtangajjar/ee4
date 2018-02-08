@@ -7,7 +7,7 @@ Feature: Check `utils/make-phar.php` output
       """
       <?php
 
-      WP_CLI::add_command( 'command example', 'Dealerdirect\Composer\Plugin\Installers\PHPCodeSniffer\Plugin' );
+      EE::add_command( 'command example', 'Dealerdirect\Composer\Plugin\Installers\PHPCodeSniffer\Plugin' );
       """
 
     When I try `php -derror_log='' {PHAR_PATH} --require=custom-cmd.php help`

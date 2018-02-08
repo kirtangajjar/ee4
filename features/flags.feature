@@ -108,7 +108,7 @@ Feature: Global flags
         }
       }
 
-      WP_CLI::set_logger( new Dummy_Logger );
+      EE::set_logger( new Dummy_Logger );
       """
 
     When I try `wp --require=custom-logger.php is-installed`
@@ -127,14 +127,14 @@ Feature: Global flags
       /**
        * @when before_wp_load
        */
-      class Test_Command extends WP_CLI_Command {
+      class Test_Command extends EE_Command {
 
         function req( $args, $assoc_args ) {
-          WP_CLI::line( $args[0] );
+          EE::line( $args[0] );
         }
       }
 
-      WP_CLI::add_command( 'test', 'Test_Command' );
+      EE::add_command( 'test', 'Test_Command' );
       """
 
     And a foo.php file:
@@ -147,14 +147,14 @@ Feature: Global flags
       <?php echo basename(__FILE__) . "\n";
       """
 
-    And a wp-cli.yml file:
+    And a ee.yml file:
       """
       require:
         - foo.php
         - bar.php
       """
 
-    And a wp-cli2.yml file:
+    And a ee2.yml file:
       """
       require: custom-cmd.php
       """
@@ -167,7 +167,7 @@ Feature: Global flags
       This is a custom command.
       """
 
-    When I run `WP_CLI_CONFIG_PATH=wp-cli2.yml wp test req 'This is a custom command.'`
+    When I run `EE_CONFIG_PATH=ee2.yml wp test req 'This is a custom command.'`
     Then STDOUT should contain:
       """
       This is a custom command.
@@ -188,7 +188,7 @@ Feature: Global flags
       <?php echo basename(__FILE__) . "\n";
       """
 
-    And a wp-cli.yml file:
+    And a ee.yml file:
       """
       require: foober/*.php
       """
@@ -220,7 +220,7 @@ Feature: Global flags
       [31;1mError:
       """
 
-  Scenario: Use `WP_CLI_STRICT_ARGS_MODE` to distinguish between global and local args
+  Scenario: Use `EE_STRICT_ARGS_MODE` to distinguish between global and local args
     Given an empty directory
     And a cmd.php file:
       """
@@ -232,14 +232,14 @@ Feature: Global flags
        * : URL passed to the callback.
        */
       $cmd_test = function( $args, $assoc_args ) {
-          $url = WP_CLI::get_runner()->config['url'] ? ' ' . WP_CLI::get_runner()->config['url'] : '';
-          WP_CLI::log( 'global:' . $url );
+          $url = EE::get_runner()->config['url'] ? ' ' . EE::get_runner()->config['url'] : '';
+          EE::log( 'global:' . $url );
           $url = isset( $assoc_args['url'] ) ? ' ' . $assoc_args['url'] : '';
-          WP_CLI::log( 'local:' . $url );
+          EE::log( 'local:' . $url );
       };
-      WP_CLI::add_command( 'cmd-test', $cmd_test );
+      EE::add_command( 'cmd-test', $cmd_test );
       """
-    And a wp-cli.yml file:
+    And a ee.yml file:
       """
       require:
         - cmd.php
@@ -252,34 +252,34 @@ Feature: Global flags
       local:
       """
 
-    When I run `WP_CLI_STRICT_ARGS_MODE=1 wp cmd-test --url=foo.dev`
+    When I run `EE_STRICT_ARGS_MODE=1 wp cmd-test --url=foo.dev`
     Then STDOUT should be:
       """
       global:
       local: foo.dev
       """
 
-    When I run `WP_CLI_STRICT_ARGS_MODE=1 wp --url=bar.dev cmd-test --url=foo.dev`
+    When I run `EE_STRICT_ARGS_MODE=1 wp --url=bar.dev cmd-test --url=foo.dev`
     Then STDOUT should be:
       """
       global: bar.dev
       local: foo.dev
       """
 
-  Scenario: Using --http=<url> requires wp-cli/restful
+  Scenario: Using --http=<url> requires ee/restful
     Given an empty directory
 
     When I try `wp --http=foo.dev`
     Then STDERR should be:
       """
-      Error: RESTful WP-CLI needs to be installed. Try 'wp package install wp-cli/restful'.
+      Error: RESTful EE needs to be installed. Try 'wp package install ee/restful'.
       """
 
   Scenario: Strict args mode should be passed on to ssh
-    When I try `WP_CLI_STRICT_ARGS_MODE=1 wp --debug --ssh=/ --version`
+    When I try `EE_STRICT_ARGS_MODE=1 wp --debug --ssh=/ --version`
     Then STDERR should contain:
       """
-      Running SSH command: ssh -q '' -T 'WP_CLI_STRICT_ARGS_MODE=1 wp
+      Running SSH command: ssh -q '' -T 'EE_STRICT_ARGS_MODE=1 wp
       """
 
   Scenario: SSH flag should support changing directories

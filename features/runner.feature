@@ -1,4 +1,4 @@
-Feature: Runner WP-CLI
+Feature: Runner EE
 
   Scenario: Path argument should be slashed correctly
   When I try `wp no-such-command --path=/foo --debug`

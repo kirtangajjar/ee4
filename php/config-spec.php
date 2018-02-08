@@ -82,7 +82,7 @@ return array(
 		'runtime' => '[=<group>]',
 		'file' => '<group>',
 		'default' => false,
-		'desc' => 'Show all PHP errors; add verbosity to WP-CLI bootstrap.',
+		'desc' => 'Show all PHP errors; add verbosity to EE bootstrap.',
 	),
 
 	'prompt' => array(
@@ -106,7 +106,7 @@ return array(
 		'default' => array(),
 	),
 
-	# --allow-root => (NOT RECOMMENDED) Allow wp-cli to run as root. This poses
+	# --allow-root => (NOT RECOMMENDED) Allow ee to run as root. This poses
 	# a security risk, so you probably do not want to do this.
 	'allow-root' => array(
 		'file' => false, # Explicit. Just in case the default changes.

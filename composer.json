@@ -1,12 +1,12 @@
 {
-	"name": "wp-cli/wp-cli",
+	"name": "wp-cli/ee",
 	"description": "The command line interface for WordPress",
 	"keywords": [ "cli", "wordpress" ],
-	"homepage": "https://wp-cli.org",
+	"homepage": "https://ee.org",
 	"license": "MIT",
 	"support": {
-		"issues": "https://github.com/wp-cli/wp-cli/issues",
-		"source": "https://github.com/wp-cli/wp-cli",
+		"issues": "https://github.com/ee/ee/issues",
+		"source": "https://github.com/ee/ee",
 		"docs": "https://make.wordpress.org/cli/handbook/"
 	},
 	"bin": [
@@ -77,7 +77,7 @@
 		"psy/psysh": "Enhanced `wp shell` functionality"
 	},
 	"autoload": {
-		"psr-0": { "WP_CLI": "php" },
+		"psr-0": { "EE": "php" },
 		"psr-4": { "": "php/commands/src" }
 	},
 	"extra": {
@@ -85,8 +85,8 @@
 			"dev-master": "1.5.x-dev"
 		},
 		"autoload-splitter": {
-			"splitter-logic": "WP_CLI\\AutoloadSplitter",
-			"splitter-location": "php/WP_CLI/AutoloadSplitter.php",
+			"splitter-logic": "EE\\AutoloadSplitter",
+			"splitter-location": "php/EE/AutoloadSplitter.php",
 			"split-target-prefix-true": "autoload_commands",
 			"split-target-prefix-false": "autoload_framework"
 		}

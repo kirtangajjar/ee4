@@ -1,6 +1,6 @@
 Feature: `wp cli completions` tasks
 
-  Scenario: Bash Completion without wp-cli.yml
+  Scenario: Bash Completion without ee.yml
     Given an empty directory
 
     When I run `wp cli completions --line="wp " --point=100`
@@ -113,7 +113,7 @@ Feature: `wp cli completions` tasks
 
   Scenario: Bash Completion with SSH aliases
     Given an empty directory
-    And a wp-cli.yml file:
+    And a ee.yml file:
       """
       @example:
         ssh: example.com
