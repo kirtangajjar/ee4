@@ -26,7 +26,7 @@ Feature: Review CLI information
     When I run `wp cli info`
     Then STDOUT should contain:
       """
-      EE packages dir:
+      EE packages dir
       """
 
   Scenario: Packages directory path should be slashed correctly

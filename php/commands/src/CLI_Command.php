@@ -130,18 +130,29 @@ class CLI_Command extends EE_Command {
 
 			EE::line( json_encode( $info ) );
 		} else {
-			EE::line( "OS:\t" . $system_os );
-			EE::line( "Shell:\t" . $shell );
-			EE::line( "PHP binary:\t" . $php_bin );
-			EE::line( "PHP version:\t" . PHP_VERSION );
-			EE::line( "php.ini used:\t" . get_cfg_var( 'cfg_file_path' ) );
-			EE::line( "EE root dir:\t" . EE_ROOT );
-			EE::line( "EE vendor dir:\t" . EE_VENDOR_DIR );
-			EE::line( "EE phar path:\t" . ( defined( 'EE_PHAR_PATH' ) ? EE_PHAR_PATH : '' ) );
-			EE::line( "EE packages dir:\t" . $packages_dir );
-			EE::line( "EE global config:\t" . $runner->global_config_path );
-			EE::line( "EE project config:\t" . $runner->project_config_path );
-			EE::line( "EE version:\t" . EE_VERSION );
+
+			$info = array(
+				array( 'OS', $system_os ),
+				array( 'Shell', $shell ),
+				array( 'PHP binary', $php_bin ),
+				array( 'PHP version', PHP_VERSION ),
+				array( 'php.ini used', get_cfg_var( 'cfg_file_path' ) ),
+				array( 'EE root dir', WP_CLI_ROOT ),
+				array( 'EE vendor dir', WP_CLI_VENDOR_DIR ),
+				array( 'EE phar path', ( defined( 'WP_CLI_PHAR_PATH' ) ? WP_CLI_PHAR_PATH : '' ) ),
+				array( 'EE packages dir', $packages_dir ),
+				array( 'EE global config', $runner->global_config_path ),
+				array( 'EE project config', $runner->project_config_path ),
+				array( 'EE version', WP_CLI_VERSION ),
+			);
+
+			$info_table = new \cli\Table();
+			$info_table->setRows( $info );
+			$info_table->setRenderer( new \cli\table\Ascii() );
+			$lines = array_slice( $info_table->getDisplayLines(), 2 );
+			foreach ( $lines as $line ) {
+				\EE::line( $line );
+			}
 		}
 	}
 
