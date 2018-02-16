@@ -275,39 +275,6 @@ class EE {
 	}
 
 	/**
-	 * Add a callback to a WordPress action or filter.
-	 *
-	 * `add_action()` without needing access to `add_action()`. If WordPress is
-	 * already loaded though, you should use `add_action()` (and `add_filter()`)
-	 * instead.
-	 *
-	 * @access public
-	 * @category Registration
-	 *
-	 * @param string $tag Named WordPress action or filter.
-	 * @param mixed $function_to_add Callable to execute when the action or filter is evaluated.
-	 * @param integer $priority Priority to add the callback as.
-	 * @param integer $accepted_args Number of arguments to pass to callback.
-	 * @return true
-	 */
-	public static function add_wp_hook( $tag, $function_to_add, $priority = 10, $accepted_args = 1 ) {
-		global $wp_filter, $merged_filters;
-
-		if ( function_exists( 'add_filter' ) ) {
-			add_filter( $tag, $function_to_add, $priority, $accepted_args );
-		} else {
-			$idx = self::wp_hook_build_unique_id( $tag, $function_to_add, $priority );
-			$wp_filter[ $tag ][ $priority ][ $idx ] = array(
-				'function' => $function_to_add,
-				'accepted_args' => $accepted_args,
-			);
-			unset( $merged_filters[ $tag ] );
-		}
-
-		return true;
-	}
-
-	/**
 	 * Build Unique ID for storage and retrieval.
 	 *
 	 * Essentially _wp_filter_build_unique_id() without needing access to _wp_filter_build_unique_id()
