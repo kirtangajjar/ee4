@@ -4,7 +4,6 @@ use \EE\ExitException;
 use \EE\Dispatcher;
 use \EE\FileCache;
 use \EE\Process;
-use \EE\WpHttpCacheManager;
 use \EE\Utils;
 use Mustangostang\Spyc;
 
@@ -123,19 +122,6 @@ class EE {
 		$_SERVER['REQUEST_URI'] = $f( 'path' ) . ( isset( $url_parts['query'] ) ? '?' . $url_parts['query'] : '' );
 		$_SERVER['SERVER_PORT'] = \EE\Utils\get_flag_value( $url_parts, 'port', '80' );
 		$_SERVER['QUERY_STRING'] = $f( 'query' );
-	}
-
-	/**
-	 * @return WpHttpCacheManager
-	 */
-	public static function get_http_cache_manager() {
-		static $http_cacher;
-
-		if ( ! $http_cacher ) {
-			$http_cacher = new WpHttpCacheManager( self::get_cache() );
-		}
-
-		return $http_cacher;
 	}
 
 	/**
