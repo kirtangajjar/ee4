@@ -10,6 +10,7 @@ return array(
 		'desc' => 'Perform operation against a remote server over SSH (or a container using scheme of "docker", "docker-compose", "vagrant").',
 	),
 
+	# Used by wp-cli to control wp site remotely.
 	# Might be useful in future for controlling ee remotely.
 	'http' => array(
 		'runtime' => '=<http>',

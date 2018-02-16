@@ -16,10 +16,10 @@ class Help_Command extends EE_Command {
 	 * ## EXAMPLES
 	 *
 	 *     # get help for `core` command
-	 *     wp help core
+	 *     ee help core
 	 *
 	 *     # get help for `core download` subcommand
-	 *     wp help core download
+	 *     ee help core download
 	 */
 	public function __invoke( $args, $assoc_args ) {
 		$r = EE::get_runner()->find_command_to_run( $args );

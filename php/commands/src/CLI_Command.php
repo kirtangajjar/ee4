@@ -9,15 +9,15 @@ use \EE\Utils;
  * ## EXAMPLES
  *
  *     # Display the version currently installed.
- *     $ wp cli version
+ *     $ ee cli version
  *     EE 0.24.1
  *
  *     # Check for updates to EE.
- *     $ wp cli check-update
+ *     $ ee cli check-update
  *     Success: EE is at the latest version.
  *
  *     # Update EE to the latest stable release.
- *     $ wp cli update
+ *     $ ee cli update
  *     You have version 0.24.0. Would you like to update to 0.24.1? [y/n] y
  *     Downloading from https://github.com/ee/ee/releases/download/v0.24.1/ee-0.24.1.phar...
  *     New version works. Proceeding to replace.
@@ -51,7 +51,7 @@ class CLI_Command extends EE_Command {
 	 * ## EXAMPLES
 	 *
 	 *     # Display CLI version.
-	 *     $ wp cli version
+	 *     $ ee cli version
 	 *     EE 0.24.1
 	 */
 	public function version() {
@@ -90,7 +90,7 @@ class CLI_Command extends EE_Command {
 	 * ## EXAMPLES
 	 *
 	 *     # Display various data about the CLI environment.
-	 *     $ wp cli info
+	 *     $ ee cli info
 	 *     OS:  Linux 4.10.0-42-generic #46~16.04.1-Ubuntu SMP Mon Dec 4 15:57:59 UTC 2017 x86_64
 	 *     Shell:   /usr/bin/zsh
 	 *     PHP binary:  /usr/bin/php
@@ -194,11 +194,11 @@ class CLI_Command extends EE_Command {
 	 * ## EXAMPLES
 	 *
 	 *     # Check for update.
-	 *     $ wp cli check-update
+	 *     $ ee cli check-update
 	 *     Success: EE is at the latest version.
 	 *
 	 *     # Check for update and new version is available.
-	 *     $ wp cli check-update
+	 *     $ ee cli check-update
 	 *     +---------+-------------+-------------------------------------------------------------------------------+
 	 *     | version | update_type | package_url                                                                   |
 	 *     +---------+-------------+-------------------------------------------------------------------------------+
@@ -260,7 +260,7 @@ class CLI_Command extends EE_Command {
 	 * ## EXAMPLES
 	 *
 	 *     # Update CLI.
-	 *     $ wp cli update
+	 *     $ ee cli update
 	 *     You have version 0.24.0. Would you like to update to 0.24.1? [y/n] y
 	 *     Downloading from https://github.com/ee/ee/releases/download/v0.24.1/ee-0.24.1.phar...
 	 *     New version works. Proceeding to replace.
@@ -336,7 +336,7 @@ class CLI_Command extends EE_Command {
 		if ( 0 !== $result->return_code || false === stripos( $result->stdout, 'EE version:' ) ) {
 			$multi_line = explode( PHP_EOL, $result->stderr );
 			EE::error_multi_line( $multi_line );
-			EE::error( 'The downloaded PHAR is broken, try running wp cli update again.' );
+			EE::error( 'The downloaded PHAR is broken, try running ee cli update again.' );
 		}
 
 		EE::log( 'New version works. Proceeding to replace.' );
@@ -468,7 +468,7 @@ class CLI_Command extends EE_Command {
 	 * ## EXAMPLES
 	 *
 	 *     # Dump the list of global parameters.
-	 *     $ wp cli param-dump --format=var_export
+	 *     $ ee cli param-dump --format=var_export
 	 *     array (
 	 *       'path' =>
 	 *       array (
@@ -512,8 +512,8 @@ class CLI_Command extends EE_Command {
 	 * ## EXAMPLES
 	 *
 	 *     # Dump the list of installed commands.
-	 *     $ wp cli cmd-dump
-	 *     {"name":"wp","description":"Manage WordPress through the command-line.","longdesc":"\n\n## GLOBAL PARAMETERS\n\n  --path=<path>\n      Path to the WordPress files.\n\n  --ssh=<ssh>\n      Perform operation against a remote server over SSH (or a container using scheme of "docker" or "docker-compose").\n\n  --url=<url>\n      Pretend request came from given URL. In multisite, this argument is how the target site is specified. \n\n  --user=<id|login|email>\n
+	 *     $ ee cli cmd-dump
+	 *     {"name":"ee","description":"Manage WordPress through the command-line.","longdesc":"\n\n## GLOBAL PARAMETERS\n\n  --path=<path>\n      Path to the WordPress files.\n\n  --ssh=<ssh>\n      Perform operation against a remote server over SSH (or a container using scheme of "docker" or "docker-compose").\n\n  --url=<url>\n      Pretend request came from given URL. In multisite, this argument is how the target site is specified. \n\n  --user=<id|login|email>\n
 	 *
 	 * @subcommand cmd-dump
 	 */
@@ -535,7 +535,7 @@ class CLI_Command extends EE_Command {
 	 * ## EXAMPLES
 	 *
 	 *     # Generate tab completion strings.
-	 *     $ wp cli completions --line='wp eva' --point=100
+	 *     $ ee cli completions --line='ee eva' --point=100
 	 *     eval
 	 *     eval-file
 	 */
@@ -567,7 +567,7 @@ class CLI_Command extends EE_Command {
 	 * ## EXAMPLES
 	 *
 	 *     # List all available aliases.
-	 *     $ wp cli alias
+	 *     $ ee cli alias
 	 *     ---
 	 *     @all: Run command against every registered alias.
 	 *     @prod:
@@ -612,12 +612,12 @@ class CLI_Command extends EE_Command {
 	 * ## EXAMPLES
 	 *
 	 *     # The "site delete" command is registered.
-	 *     $ wp cli has-command "site delete"
+	 *     $ ee cli has-command "site delete"
 	 *     $ echo $?
 	 *     0
 	 *
 	 *     # The "foo bar" command is not registered.
-	 *     $ wp cli has-command "foo bar"
+	 *     $ ee cli has-command "foo bar"
 	 *     $ echo $?
 	 *     1
 	 *
