@@ -1,17 +1,8 @@
 <?php
 
-return array(
-	'path' => array(
-		'runtime' => '=<path>',
-		'file' => '<path>',
-		'desc' => 'Path to the WordPress files.',
-	),
+# Global configuration file for EE.
 
-	'url' => array(
-		'runtime' => '=<url>',
-		'file' => '<url>',
-		'desc' => 'Pretend request came from given URL. In multisite, this argument is how the target site is specified.',
-	),
+return array(
 
 	'ssh' => array(
 		'runtime' => '=[<scheme>:][<user>@]<host|container>[:<port>][<path>]',
@@ -19,35 +10,11 @@ return array(
 		'desc' => 'Perform operation against a remote server over SSH (or a container using scheme of "docker", "docker-compose", "vagrant").',
 	),
 
+	# Might be useful in future for controlling ee remotely.
 	'http' => array(
 		'runtime' => '=<http>',
 		'file' => '<http>',
-		'desc' => 'Perform operation against a remote WordPress install over HTTP.',
-	),
-
-	'blog' => array(
-		'deprecated' => 'Use --url instead.',
-		'runtime' => '=<url>',
-	),
-
-	'user' => array(
-		'runtime' => '=<id|login|email>',
-		'file' => '<id|login|email>',
-		'desc' => 'Set the WordPress user.',
-	),
-
-	'skip-plugins' => array(
-		'runtime' => '[=<plugin>]',
-		'file' => '<list>',
-		'desc' => 'Skip loading all or some plugins. Note: mu-plugins are still loaded.',
-		'default' => '',
-	),
-
-	'skip-themes' => array(
-		'runtime' => '[=<theme>]',
-		'file' => '<list>',
-		'desc' => 'Skip loading all or some themes.',
-		'default' => '',
+		'desc' => 'Reserved for future.',
 	),
 
 	'skip-packages' => array(
@@ -97,13 +64,6 @@ return array(
 		'file' => '<bool>',
 		'default' => false,
 		'desc' => 'Suppress informational messages.',
-	),
-
-	'apache_modules' => array(
-		'file' => '<list>',
-		'desc' => 'List of Apache Modules that are to be reported as loaded.',
-		'multiple' => true,
-		'default' => array(),
 	),
 
 	# --allow-root => (NOT RECOMMENDED) Allow ee to run as root. This poses
