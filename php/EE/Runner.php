@@ -330,9 +330,7 @@ class Runner {
 	 * @param array $options     Configuration options for the function.
 	 */
 	public function run_command( $args, $assoc_args = array(), $options = array() ) {
-		if ( ! empty( $options['back_compat_conversions'] ) ) {
-			list( $args, $assoc_args ) = self::back_compat_conversions( $args, $assoc_args );
-		}
+
 		$r = $this->find_command_to_run( $args );
 		if ( is_string( $r ) ) {
 			EE::error( $r );
@@ -574,187 +572,6 @@ class Runner {
 	}
 
 	/**
-	 * Transparently convert deprecated syntaxes
-	 *
-	 * @param array $args
-	 * @param array $assoc_args
-	 * @return array
-	 */
-	private static function back_compat_conversions( $args, $assoc_args ) {
-		$top_level_aliases = array(
-			'sql' => 'db',
-			'blog' => 'site',
-		);
-		if ( count( $args ) > 0 ) {
-			foreach ( $top_level_aliases as $old => $new ) {
-				if ( $old == $args[0] ) {
-					$args[0] = $new;
-					break;
-				}
-			}
-		}
-
-		// *-meta  ->  * meta
-		if ( ! empty( $args ) && preg_match( '/(post|comment|user|network)-meta/', $args[0], $matches ) ) {
-			array_shift( $args );
-			array_unshift( $args, 'meta' );
-			array_unshift( $args, $matches[1] );
-		}
-
-		// core (multsite-)install --admin_name=  ->  --admin_user=
-		if ( count( $args ) > 0 && 'core' == $args[0] && isset( $assoc_args['admin_name'] ) ) {
-			$assoc_args['admin_user'] = $assoc_args['admin_name'];
-			unset( $assoc_args['admin_name'] );
-		}
-
-		// core config  ->  config create
-		if ( array( 'core', 'config' ) == array_slice( $args, 0, 2 ) ) {
-			list( $args[0], $args[1] ) = array( 'config', 'create' );
-		}
-		// core language  ->  language core
-		if ( array( 'core', 'language' ) == array_slice( $args, 0, 2 ) ) {
-			list( $args[0], $args[1] ) = array( 'language', 'core' );
-		}
-
-		// checksum core  ->  core verify-checksums
-		if ( array( 'checksum', 'core' ) == array_slice( $args, 0, 2 ) ) {
-			list( $args[0], $args[1] ) = array( 'core', 'verify-checksums' );
-		}
-
-		// checksum plugin  ->  plugin verify-checksums
-		if ( array( 'checksum', 'plugin' ) == array_slice( $args, 0, 2 ) ) {
-			list( $args[0], $args[1] ) = array( 'plugin', 'verify-checksums' );
-		}
-
-		// site create --site_id=  ->  site create --network_id=
-		if ( count( $args ) >= 2 && 'site' === $args[0] && 'create' === $args[1] && isset( $assoc_args['site_id'] ) ) {
-			$assoc_args['network_id'] = $assoc_args['site_id'];
-			unset( $assoc_args['site_id'] );
-		}
-
-		// {plugin|theme} update-all  ->  {plugin|theme} update --all
-		if ( count( $args ) > 1 && in_array( $args[0], array( 'plugin', 'theme' ) )
-			&& 'update-all' === $args[1]
-		) {
-			$args[1] = 'update';
-			$assoc_args['all'] = true;
-		}
-
-		// transient delete-expired  ->  transient delete --expired
-		if ( count( $args ) > 1 && 'transient' === $args[0] && 'delete-expired' === $args[1] ) {
-			$args[1] = 'delete';
-			$assoc_args['expired'] = true;
-		}
-
-		// transient delete-all  ->  transient delete --all
-		if ( count( $args ) > 1 && 'transient' === $args[0] && 'delete-all' === $args[1] ) {
-			$args[1] = 'delete';
-			$assoc_args['all'] = true;
-		}
-
-		// plugin scaffold  ->  scaffold plugin
-		if ( array( 'plugin', 'scaffold' ) == array_slice( $args, 0, 2 ) ) {
-			list( $args[0], $args[1] ) = array( $args[1], $args[0] );
-		}
-
-		// foo --help  ->  help foo
-		if ( isset( $assoc_args['help'] ) ) {
-			array_unshift( $args, 'help' );
-			unset( $assoc_args['help'] );
-		}
-
-		// {post|user} list --ids  ->  {post|user} list --format=ids
-		if ( count( $args ) > 1 && in_array( $args[0], array( 'post', 'user' ) )
-			&& 'list' === $args[1]
-			&& isset( $assoc_args['ids'] )
-		) {
-			$assoc_args['format'] = 'ids';
-			unset( $assoc_args['ids'] );
-		}
-
-		// --json  ->  --format=json
-		if ( isset( $assoc_args['json'] ) ) {
-			$assoc_args['format'] = 'json';
-			unset( $assoc_args['json'] );
-		}
-
-		// --{version|info}  ->  cli {version|info}
-		if ( empty( $args ) ) {
-			$special_flags = array( 'version', 'info' );
-			foreach ( $special_flags as $key ) {
-				if ( isset( $assoc_args[ $key ] ) ) {
-					$args = array( 'cli', $key );
-					unset( $assoc_args[ $key ] );
-					break;
-				}
-			}
-		}
-
-		// (post|comment|site|term) url  --> (post|comment|site|term) list --*__in --field=url
-		if ( count( $args ) >= 2 && in_array( $args[0], array( 'post', 'comment', 'site', 'term' ) ) && 'url' === $args[1] ) {
-			switch ( $args[0] ) {
-				case 'post':
-					$post_ids = array_slice( $args, 2 );
-					$args = array( 'post', 'list' );
-					$assoc_args['post__in'] = implode( ',', $post_ids );
-					$assoc_args['post_type'] = 'any';
-					$assoc_args['orderby'] = 'post__in';
-					$assoc_args['field'] = 'url';
-					break;
-				case 'comment':
-					$comment_ids = array_slice( $args, 2 );
-					$args = array( 'comment', 'list' );
-					$assoc_args['comment__in'] = implode( ',', $comment_ids );
-					$assoc_args['orderby'] = 'comment__in';
-					$assoc_args['field'] = 'url';
-					break;
-				case 'site':
-					$site_ids = array_slice( $args, 2 );
-					$args = array( 'site', 'list' );
-					$assoc_args['site__in'] = implode( ',', $site_ids );
-					$assoc_args['field'] = 'url';
-					break;
-				case 'term':
-					$taxonomy = '';
-					if ( isset( $args[2] ) ) {
-						$taxonomy = $args[2];
-					}
-					$term_ids = array_slice( $args, 3 );
-					$args = array( 'term', 'list', $taxonomy );
-					$assoc_args['include'] = implode( ',', $term_ids );
-					$assoc_args['orderby'] = 'include';
-					$assoc_args['field'] = 'url';
-					break;
-			}
-		}
-
-		// config get --[global|constant]=<global|constant> --> config get <name> --type=constant|variable
-		// config get --> config list
-		if ( count( $args ) === 2
-			&& 'config' === $args[0]
-			&& 'get' === $args[1] ) {
-			if ( isset( $assoc_args['global'] ) ) {
-				$name = $assoc_args['global'];
-				$type = 'variable';
-				unset( $assoc_args['global'] );
-			} elseif ( isset( $assoc_args['constant'] ) ) {
-				$name = $assoc_args['constant'];
-				$type = 'constant';
-				unset( $assoc_args['constant'] );
-			}
-			if ( ! empty( $name ) && ! empty( $type ) ) {
-				$args[] = $name;
-				$assoc_args['type'] = $type;
-			} else {
-				// We had a 'config get' without a '<name>', so assume 'list' was wanted.
-				$args[1] = 'list';
-			}
-		}
-
-		return array( $args, $assoc_args );
-	}
-
-	/**
 	 * Whether or not the output should be rendered in color
 	 *
 	 * @return bool
@@ -871,10 +688,6 @@ class Runner {
 		// Runtime config and args
 		{
 			list( $args, $assoc_args, $this->runtime_config ) = $configurator->parse_args( $argv );
-
-			list( $this->arguments, $this->assoc_args ) = self::back_compat_conversions(
-				$args, $assoc_args
-			);
 
 			$configurator->merge_array( $this->runtime_config );
 		}
