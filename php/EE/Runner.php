@@ -186,6 +186,59 @@ class Runner {
 	}
 
 	/**
+	 * Find the directory that contains the WordPress files.
+	 * Defaults to the current working dir.
+	 *
+	 * @return string An absolute path
+	 */
+	private function find_wp_root() {
+		if ( ! empty( $this->config['path'] ) ) {
+			$path = $this->config['path'];
+			if ( ! Utils\is_path_absolute( $path ) ) {
+				$path = getcwd() . '/' . $path;
+			}
+
+			return $path;
+		}
+
+		if ( $this->cmd_starts_with( array( 'core', 'download' ) ) ) {
+			return getcwd();
+		}
+
+		$dir = getcwd();
+
+		while ( is_readable( $dir ) ) {
+			if ( file_exists( "$dir/wp-load.php" ) ) {
+				return $dir;
+			}
+
+			if ( file_exists( "$dir/index.php" ) ) {
+				if ( $path = self::extract_subdir_path( "$dir/index.php" ) ) {
+					return $path;
+				}
+			}
+
+			$parent_dir = dirname( $dir );
+			if ( empty( $parent_dir ) || $parent_dir === $dir ) {
+				break;
+			}
+			$dir = $parent_dir;
+		}
+	}
+
+	/**
+	 * Set WordPress root as a given path.
+	 *
+	 * @param string $path
+	 */
+	private static function set_wp_root( $path ) {
+		define( 'ABSPATH', Utils\trailingslashit( $path ) );
+		EE::debug( 'ABSPATH defined: ' . ABSPATH, 'bootstrap' );
+
+		$_SERVER['DOCUMENT_ROOT'] = realpath( $path );
+	}
+
+	/**
 	 * Guess which URL context EE has been invoked under.
 	 *
 	 * @param array $assoc_args
@@ -487,6 +540,38 @@ class Runner {
 	}
 
 	/**
+	 * Returns wp-config.php code, skipping the loading of wp-settings.php
+	 *
+	 * @return string
+	 */
+	public function get_wp_config_code() {
+		$wp_config_path = Utils\locate_wp_config();
+
+		$wp_config_code = explode( "\n", file_get_contents( $wp_config_path ) );
+
+		$found_wp_settings = false;
+
+		$lines_to_run = array();
+
+		foreach ( $wp_config_code as $line ) {
+			if ( preg_match( '/^\s*require.+wp-settings\.php/', $line ) ) {
+				$found_wp_settings = true;
+				continue;
+			}
+
+			$lines_to_run[] = $line;
+		}
+
+		if ( ! $found_wp_settings ) {
+			EE::error( 'Strange wp-config.php file: wp-settings.php is not loaded directly.' );
+		}
+
+		$source = implode( "\n", $lines_to_run );
+		$source = Utils\replace_path_consts( $source, $wp_config_path );
+		return preg_replace( '|^\s*\<\?php\s*|', '', $source );
+	}
+
+	/**
 	 * Whether or not the output should be rendered in color
 	 *
 	 * @return bool
@@ -515,6 +600,66 @@ class Runner {
 
 	public function get_required_files() {
 		return $this->_required_files;
+	}
+
+	/**
+	 * Do WordPress core files exist?
+	 *
+	 * @return bool
+	 */
+	private function wp_exists() {
+		return file_exists( ABSPATH . 'wp-includes/version.php' );
+	}
+
+	/**
+	 * Are WordPress core files readable?
+	 *
+	 * @return bool
+	 */
+	private function wp_is_readable() {
+		return is_readable( ABSPATH . 'wp-includes/version.php' );
+	}
+
+	private function check_wp_version() {
+		$wp_exists = $this->wp_exists();
+		$wp_is_readable = $this->wp_is_readable();
+		if ( ! $wp_exists || ! $wp_is_readable ) {
+			$this->show_synopsis_if_composite_command();
+			// If the command doesn't exist use as error.
+			$args = $this->cmd_starts_with( array( 'help' ) ) ? array_slice( $this->arguments, 1 ) : $this->arguments;
+			$suggestion_or_disabled = $this->find_command_to_run( $args );
+			if ( is_string( $suggestion_or_disabled ) ) {
+				if ( ! preg_match( '/disabled from the config file.$/', $suggestion_or_disabled ) ) {
+					EE::warning( "No WordPress install found. If the command '" . implode( ' ', $args ) . "' is in a plugin or theme, pass --path=`path/to/wordpress`." );
+				}
+				EE::error( $suggestion_or_disabled );
+			}
+
+			if ( $wp_exists && ! $wp_is_readable ) {
+				EE::error(
+					'It seems, the WordPress core files do not have the proper file permissions.'
+				);
+			}
+			EE::error(
+				"This does not seem to be a WordPress install.\n" .
+				'Pass --path=`path/to/wordpress` or run `wp core download`.'
+			);
+		}
+
+		global $wp_version;
+		include ABSPATH . 'wp-includes/version.php';
+
+		$minimum_version = '3.7';
+
+		// @codingStandardsIgnoreStart
+		if ( version_compare( $wp_version, $minimum_version, '<' ) ) {
+			EE::error(
+				"EE needs WordPress $minimum_version or later to work properly. " .
+				"The version currently installed is $wp_version.\n" .
+				'Try running `wp core download --force`.'
+			);
+		}
+		// @codingStandardsIgnoreEnd
 	}
 
 	public function init_config() {
@@ -683,20 +828,137 @@ class Runner {
 			$this->_run_command_and_exit();
 		}
 
+		if ( isset( $this->config['http'] ) && ! class_exists( '\WP_REST_CLI\Runner' ) ) {
+			EE::error( "RESTful EE needs to be installed. Try 'wp package install ee/restful'." );
+		}
+
 		if ( $this->config['ssh'] ) {
 			$this->run_ssh_command( $this->config['ssh'] );
 			return;
 		}
 
+		// Handle --path parameter
+		self::set_wp_root( $this->find_wp_root() );
+
 		// First try at showing man page - if help command and either haven't found 'version.php' or 'wp-config.php' (so won't be loading WP & adding commands) or help on subcommand.
-		if ( $this->cmd_starts_with( array( 'help' ) ) ) {
+		if ( $this->cmd_starts_with( array( 'help' ) )
+			&& ( ! $this->wp_exists()
+				|| ! Utils\locate_wp_config()
+				|| count( $this->arguments ) > 2
+			) ) {
 			$this->auto_check_update();
 			$this->run_command( $this->arguments, $this->assoc_args );
 			// Help didn't exit so failed to find the command at this stage.
 		}
 
+		// Handle --url parameter
+		$url = self::guess_url( $this->config );
+		if ( $url ) {
+			\EE::set_url( $url );
+		}
+
+		$this->do_early_invoke( 'before_wp_load' );
+
+		$this->check_wp_version();
+
+		if ( $this->cmd_starts_with( array( 'config', 'create' ) ) ) {
+			$this->_run_command_and_exit();
+		}
+
+		if ( ! Utils\locate_wp_config() ) {
+			EE::error(
+				"'wp-config.php' not found.\n" .
+				'Either create one manually or use `wp config create`.'
+			);
+		}
+
+		if ( $this->cmd_starts_with( array( 'core', 'is-installed' ) )
+			|| $this->cmd_starts_with( array( 'core', 'update-db' ) ) ) {
+			define( 'WP_INSTALLING', true );
+		}
+
+		if (
+			count( $this->arguments ) >= 2 &&
+			'core' === $this->arguments[0] &&
+			in_array( $this->arguments[1], array( 'install', 'multisite-install' ) )
+		) {
+			define( 'WP_INSTALLING', true );
+
+			// We really need a URL here
+			if ( ! isset( $_SERVER['HTTP_HOST'] ) ) {
+				$url = 'http://example.com';
+				\EE::set_url( $url );
+			}
+
+			if ( 'multisite-install' == $this->arguments[1] ) {
+				// need to fake some globals to skip the checks in wp-includes/ms-settings.php
+				$url_parts = Utils\parse_url( $url );
+				self::fake_current_site_blog( $url_parts );
+
+				if ( ! defined( 'COOKIEHASH' ) ) {
+					define( 'COOKIEHASH', md5( $url_parts['host'] ) );
+				}
+			}
+		}
+
+		if ( $this->cmd_starts_with( array( 'import' ) ) ) {
+			define( 'WP_LOAD_IMPORTERS', true );
+			define( 'WP_IMPORTING', true );
+		}
+
+		if ( $this->cmd_starts_with( array( 'cron', 'event', 'run' ) ) ) {
+			define( 'DOING_CRON', true );
+		}
+
 		$this->_run_command_and_exit();
 
+	}
+
+	private static function fake_current_site_blog( $url_parts ) {
+		global $current_site, $current_blog;
+
+		if ( ! isset( $url_parts['path'] ) ) {
+			$url_parts['path'] = '/';
+		}
+
+		$current_site = (object) array(
+			'id' => 1,
+			'blog_id' => 1,
+			'domain' => $url_parts['host'],
+			'path' => $url_parts['path'],
+			'cookie_domain' => $url_parts['host'],
+			'site_name' => 'Fake Site',
+		);
+
+		$current_blog = (object) array(
+			'blog_id' => 1,
+			'site_id' => 1,
+			'domain' => $url_parts['host'],
+			'path' => $url_parts['path'],
+			'public' => '1',
+			'archived' => '0',
+			'mature' => '0',
+			'spam' => '0',
+			'deleted' => '0',
+			'lang_id' => '0',
+		);
+	}
+
+	/**
+	 * Called after wp-config.php is eval'd, to potentially reset `--url`
+	 */
+	private function maybe_update_url_from_domain_constant() {
+		if ( ! empty( $this->config['url'] ) || ! empty( $this->config['blog'] ) ) {
+			return;
+		}
+
+		if ( defined( 'DOMAIN_CURRENT_SITE' ) ) {
+			$url = DOMAIN_CURRENT_SITE;
+			if ( defined( 'PATH_CURRENT_SITE' ) ) {
+				$url .= PATH_CURRENT_SITE;
+			}
+			\EE::set_url( $url );
+		}
 	}
 
 	/**
@@ -715,6 +977,19 @@ class Runner {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Error handler for `wp_die()` when the command is help to try to trap errors (db connection failure in particular) during WordPress load.
+	 */
+	public function help_wp_die_handler( $message ) {
+		$help_exit_warning = 'Error during WordPress load.';
+		if ( $message instanceof \WP_Error ) {
+			$help_exit_warning = EE\Utils\wp_clean_error_message( $message->get_error_message() );
+		} elseif ( is_string( $message ) ) {
+			$help_exit_warning = EE\Utils\wp_clean_error_message( $message );
+		}
+		$this->_run_command_and_exit( $help_exit_warning );
 	}
 
 	/**
