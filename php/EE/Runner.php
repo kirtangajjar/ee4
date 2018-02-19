@@ -945,23 +945,6 @@ class Runner {
 	}
 
 	/**
-	 * Called after wp-config.php is eval'd, to potentially reset `--url`
-	 */
-	private function maybe_update_url_from_domain_constant() {
-		if ( ! empty( $this->config['url'] ) || ! empty( $this->config['blog'] ) ) {
-			return;
-		}
-
-		if ( defined( 'DOMAIN_CURRENT_SITE' ) ) {
-			$url = DOMAIN_CURRENT_SITE;
-			if ( defined( 'PATH_CURRENT_SITE' ) ) {
-				$url .= PATH_CURRENT_SITE;
-			}
-			\EE::set_url( $url );
-		}
-	}
-
-	/**
 	 * Whether or not this WordPress install is multisite.
 	 *
 	 * For use after wp-config.php has loaded, but before the rest of WordPress
