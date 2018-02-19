@@ -185,31 +185,6 @@ class Runner {
 		return $wp_path;
 	}
 
-	/**
-	 * Guess which URL context EE has been invoked under.
-	 *
-	 * @param array $assoc_args
-	 * @return string|false
-	 */
-	private static function guess_url( $assoc_args ) {
-		if ( isset( $assoc_args['blog'] ) ) {
-			$assoc_args['url'] = $assoc_args['blog'];
-		}
-
-		if ( isset( $assoc_args['url'] ) ) {
-			$url = $assoc_args['url'];
-			if ( true === $url ) {
-				EE::warning( 'The --url parameter expects a value.' );
-			}
-		}
-
-		if ( isset( $url ) ) {
-			return $url;
-		}
-
-		return false;
-	}
-
 	private function cmd_starts_with( $prefix ) {
 		return array_slice( $this->arguments, 0, count( $prefix ) ) === $prefix;
 	}
@@ -697,36 +672,6 @@ class Runner {
 
 		$this->_run_command_and_exit();
 
-	}
-
-	private static function fake_current_site_blog( $url_parts ) {
-		global $current_site, $current_blog;
-
-		if ( ! isset( $url_parts['path'] ) ) {
-			$url_parts['path'] = '/';
-		}
-
-		$current_site = (object) array(
-			'id' => 1,
-			'blog_id' => 1,
-			'domain' => $url_parts['host'],
-			'path' => $url_parts['path'],
-			'cookie_domain' => $url_parts['host'],
-			'site_name' => 'Fake Site',
-		);
-
-		$current_blog = (object) array(
-			'blog_id' => 1,
-			'site_id' => 1,
-			'domain' => $url_parts['host'],
-			'path' => $url_parts['path'],
-			'public' => '1',
-			'archived' => '0',
-			'mature' => '0',
-			'spam' => '0',
-			'deleted' => '0',
-			'lang_id' => '0',
-		);
 	}
 
 	/**
