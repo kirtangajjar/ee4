@@ -439,35 +439,6 @@ class FeatureContext extends BehatContext implements ClosuredContextInterface {
 		$this->variables['CACHE_DIR'] = $path;
 	}
 
-	/**
-	 * Run a MySQL command with `$db_settings`.
-	 *
-	 * @param string $sql_cmd Command to run.
-	 * @param array $assoc_args Optional. Associative array of options. Default empty.
-	 * @param bool $add_database Optional. Whether to add dbname to the $sql_cmd. Default false.
-	 */
-	private static function run_sql( $sql_cmd, $assoc_args = array(), $add_database = false ) {
-		$default_assoc_args = array(
-			'host' => self::$db_settings['dbhost'],
-			'user' => self::$db_settings['dbuser'],
-			'pass' => self::$db_settings['dbpass'],
-		);
-		if ( $add_database ) {
-			$sql_cmd .= ' ' . escapeshellarg( self::$db_settings['dbname'] );
-		}
-		$start_time = microtime( true );
-	}
-
-	public function create_db() {
-		$dbname = self::$db_settings['dbname'];
-		self::run_sql( 'mysql --no-defaults', array( 'execute' => "CREATE DATABASE IF NOT EXISTS $dbname" ) );
-	}
-
-	public function drop_db() {
-		$dbname = self::$db_settings['dbname'];
-		self::run_sql( 'mysql --no-defaults', array( 'execute' => "DROP DATABASE IF EXISTS $dbname" ) );
-	}
-
 	public function proc( $command, $assoc_args = array(), $path = '' ) {
 		if ( !empty( $assoc_args ) )
 			$command .= Utils\assoc_args_to_str( $assoc_args );
