@@ -980,19 +980,6 @@ class Runner {
 	}
 
 	/**
-	 * Error handler for `wp_die()` when the command is help to try to trap errors (db connection failure in particular) during WordPress load.
-	 */
-	public function help_wp_die_handler( $message ) {
-		$help_exit_warning = 'Error during WordPress load.';
-		if ( $message instanceof \WP_Error ) {
-			$help_exit_warning = EE\Utils\wp_clean_error_message( $message->get_error_message() );
-		} elseif ( is_string( $message ) ) {
-			$help_exit_warning = EE\Utils\wp_clean_error_message( $message );
-		}
-		$this->_run_command_and_exit( $help_exit_warning );
-	}
-
-	/**
 	 * Check whether there's a EE update available, and suggest update if so.
 	 */
 	private function auto_check_update() {
