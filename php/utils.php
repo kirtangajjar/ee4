@@ -402,41 +402,6 @@ function mysql_host_to_cli_args( $raw_host ) {
 	return $assoc_args;
 }
 
-function run_mysql_command( $cmd, $assoc_args, $descriptors = null ) {
-	check_proc_available( 'run_mysql_command' );
-
-	if ( ! $descriptors ) {
-		$descriptors = array( STDIN, STDOUT, STDERR );
-	}
-
-	if ( isset( $assoc_args['host'] ) ) {
-		//@codingStandardsIgnoreStart
-		$assoc_args = array_merge( $assoc_args, mysql_host_to_cli_args( $assoc_args['host'] ) );
-		//@codingStandardsIgnoreEnd
-	}
-
-	$pass = $assoc_args['pass'];
-	unset( $assoc_args['pass'] );
-
-	$old_pass = getenv( 'MYSQL_PWD' );
-	putenv( 'MYSQL_PWD=' . $pass );
-
-	$final_cmd = force_env_on_nix_systems( $cmd ) . assoc_args_to_str( $assoc_args );
-
-	$proc = proc_open_compat( $final_cmd, $descriptors, $pipes );
-	if ( ! $proc ) {
-		exit( 1 );
-	}
-
-	$r = proc_close( $proc );
-
-	putenv( 'MYSQL_PWD=' . $old_pass );
-
-	if ( $r ) {
-		exit( $r );
-	}
-}
-
 /**
  * Render PHP or other types of files using Mustache templates.
  *

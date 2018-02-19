@@ -1,19 +1,5 @@
 Feature: Utilities that do NOT depend on WordPress code
 
-  Scenario Outline: Check that `proc_open()` and `proc_close()` aren't disabled for `Utils\run_mysql_command()`
-    When I try `{INVOKE_WP_CLI_WITH_PHP_ARGS--ddisable_functions=<func>} --skip-wordpress eval 'WP_CLI\Utils\run_mysql_command( null, array() );'`
-    Then STDERR should contain:
-      """
-      Error: Cannot do 'run_mysql_command': The PHP functions `proc_open()` and/or `proc_close()` are disabled
-      """
-    And STDOUT should be empty
-    And the return code should be 1
-
-    Examples:
-      | func       |
-      | proc_open  |
-      | proc_close |
-
   Scenario Outline: Check that `proc_open()` and `proc_close()` aren't disabled for `Utils\launch_editor_for_input()`
     When I try `{INVOKE_WP_CLI_WITH_PHP_ARGS--ddisable_functions=<func>} --skip-wordpress eval 'WP_CLI\Utils\launch_editor_for_input( null, null );'`
     Then STDERR should contain:

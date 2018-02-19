@@ -520,10 +520,6 @@ class FeatureContext extends BehatContext implements ClosuredContextInterface {
 			$sql_cmd .= ' ' . escapeshellarg( self::$db_settings['dbname'] );
 		}
 		$start_time = microtime( true );
-		Utils\run_mysql_command( $sql_cmd, array_merge( $assoc_args, $default_assoc_args ) );
-		if ( self::$log_run_times ) {
-			self::log_proc_method_run_time( 'run_sql ' . $sql_cmd, $start_time );
-		}
 	}
 
 	public function create_db() {
