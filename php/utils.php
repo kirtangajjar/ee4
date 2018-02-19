@@ -225,12 +225,6 @@ function esc_cmd( $cmd ) {
 	return vsprintf( $cmd, array_map( 'escapeshellarg', $args ) );
 }
 
-function wp_version_compare( $since, $operator ) {
-	$wp_version = str_replace( '-src', '', $GLOBALS['wp_version'] );
-	$since = str_replace( '-src', '', $since );
-	return version_compare( $wp_version, $since, $operator );
-}
-
 /**
  * Render a collection of items as an ASCII table, JSON, CSV, YAML, list of ids, or count.
  *
