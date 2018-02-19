@@ -505,20 +505,6 @@ class FeatureContext extends BehatContext implements ClosuredContextInterface {
 		$wp_config_code = str_replace( $token, "$line\n\n$token", $wp_config_code );
 	}
 
-	public function download_wp( $subdir = '' ) {
-		$dest_dir = $this->variables['RUN_DIR'] . "/$subdir";
-
-		if ( $subdir ) {
-			mkdir( $dest_dir );
-		}
-
-		self::copy_dir( self::$cache_dir, $dest_dir );
-
-		// disable emailing
-		mkdir( $dest_dir . '/wp-content/mu-plugins' );
-		copy( __DIR__ . '/../extra/no-mail.php', $dest_dir . '/wp-content/mu-plugins/no-mail.php' );
-	}
-
 	public function create_config( $subdir = '', $extra_php = false ) {
 		$params = self::$db_settings;
 
@@ -545,74 +531,6 @@ class FeatureContext extends BehatContext implements ClosuredContextInterface {
 				copy( $run_dir . '/wp-config.php', $config_cache_path );
 			}
 		}
-	}
-
-	public function install_wp( $subdir = '' ) {
-		$wp_version_suffix = ( $wp_version = getenv( 'WP_VERSION' ) ) ? "-$wp_version" : '';
-		self::$install_cache_dir = sys_get_temp_dir() . '/ee-test-core-install-cache' . $wp_version_suffix;
-		if ( ! file_exists( self::$install_cache_dir ) ) {
-			mkdir( self::$install_cache_dir );
-		}
-
-		$subdir = $this->replace_variables( $subdir );
-
-		$this->create_db();
-		$this->create_run_dir();
-		$this->download_wp( $subdir );
-		$this->create_config( $subdir );
-
-		$install_args = array(
-			'url' => 'http://example.com',
-			'title' => 'WP CLI Site',
-			'admin_user' => 'admin',
-			'admin_email' => 'admin@example.com',
-			'admin_password' => 'password1',
-			'skip-email' => true,
-		);
-
-		$install_cache_path = '';
-		if ( self::$install_cache_dir ) {
-			$install_cache_path = self::$install_cache_dir . '/install_' . md5( implode( ':', $install_args ) . ':subdir=' . $subdir );
-			$run_dir = '' !== $subdir ? ( $this->variables['RUN_DIR'] . "/$subdir" ) : $this->variables['RUN_DIR'];
-		}
-
-		if ( $install_cache_path && file_exists( $install_cache_path ) ) {
-			self::copy_dir( $install_cache_path, $run_dir );
-			self::run_sql( 'mysql --no-defaults', array( 'execute' => "source {$install_cache_path}.sql" ), true /*add_database*/ );
-		} else {
-			$this->proc( 'wp core install', $install_args, $subdir )->run_check();
-			if ( $install_cache_path ) {
-				mkdir( $install_cache_path );
-				self::dir_diff_copy( $run_dir, self::$cache_dir, $install_cache_path );
-				self::run_sql( 'mysqldump --no-defaults', array( 'result-file' => "{$install_cache_path}.sql" ), true /*add_database*/ );
-			}
-		}
-	}
-
-	public function install_wp_with_composer( $vendor_directory = 'vendor' ) {
-		$this->create_run_dir();
-		$this->create_db();
-
-		$yml_path = $this->variables['RUN_DIR'] . "/ee.yml";
-		file_put_contents( $yml_path, 'path: wordpress' );
-
-		$this->composer_command( 'init --name="ee/composer-test" --type="project" --no-interaction' );
-		$this->composer_command( 'config vendor-dir ' . $vendor_directory );
-		$this->composer_command( 'require johnpbloch/wordpress --optimize-autoloader --no-interaction' );
-
-		$config_extra_php = "require_once dirname(__DIR__) . '/" . $vendor_directory . "/autoload.php';";
-		$this->create_config( 'wordpress', $config_extra_php );
-
-		$install_args = array(
-			'url' => 'http://localhost:8080',
-			'title' => 'WP CLI Site with both WordPress and ee as Composer dependencies',
-			'admin_user' => 'admin',
-			'admin_email' => 'admin@example.com',
-			'admin_password' => 'password1',
-			'skip-email' => true,
-		);
-
-		$this->proc( 'wp core install', $install_args )->run_check();
 	}
 
 	public function composer_add_ee_local_repository() {
