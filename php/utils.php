@@ -1286,24 +1286,6 @@ function _proc_open_compat_win_env( $cmd, &$env ) {
 }
 
 /**
- * First half of escaping for LIKE special characters % and _ before preparing for MySQL.
- *
- * Use this only before wpdb::prepare() or esc_sql().  Reversing the order is very bad for security.
- *
- * Copied from core "wp-includes/wp-db.php". Avoids dependency on WP 4.4 wpdb.
- *
- * @access public
- *
- * @param string $text The raw text to be escaped. The input typed by the user should have no
- *                     extra or deleted slashes.
- * @return string Text in the form of a LIKE phrase. The output is not SQL safe. Call $wpdb::prepare()
- *                or real_escape next.
- */
-function esc_like( $text ) {
-	return addcslashes( $text, '_%\\' );
-}
-
-/**
  * Escapes (backticks) MySQL identifiers (aka schema object names) - i.e. column names, table names, and database/index/alias/view etc names.
  * See https://dev.mysql.com/doc/refman/5.5/en/identifiers.html
  *
