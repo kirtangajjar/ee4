@@ -588,48 +588,6 @@ class Runner {
 		return is_readable( ABSPATH . 'wp-includes/version.php' );
 	}
 
-	private function check_wp_version() {
-		$wp_exists = $this->wp_exists();
-		$wp_is_readable = $this->wp_is_readable();
-		if ( ! $wp_exists || ! $wp_is_readable ) {
-			$this->show_synopsis_if_composite_command();
-			// If the command doesn't exist use as error.
-			$args = $this->cmd_starts_with( array( 'help' ) ) ? array_slice( $this->arguments, 1 ) : $this->arguments;
-			$suggestion_or_disabled = $this->find_command_to_run( $args );
-			if ( is_string( $suggestion_or_disabled ) ) {
-				if ( ! preg_match( '/disabled from the config file.$/', $suggestion_or_disabled ) ) {
-					EE::warning( "No WordPress install found. If the command '" . implode( ' ', $args ) . "' is in a plugin or theme, pass --path=`path/to/wordpress`." );
-				}
-				EE::error( $suggestion_or_disabled );
-			}
-
-			if ( $wp_exists && ! $wp_is_readable ) {
-				EE::error(
-					'It seems, the WordPress core files do not have the proper file permissions.'
-				);
-			}
-			EE::error(
-				"This does not seem to be a WordPress install.\n" .
-				'Pass --path=`path/to/wordpress` or run `wp core download`.'
-			);
-		}
-
-		global $wp_version;
-		include ABSPATH . 'wp-includes/version.php';
-
-		$minimum_version = '3.7';
-
-		// @codingStandardsIgnoreStart
-		if ( version_compare( $wp_version, $minimum_version, '<' ) ) {
-			EE::error(
-				"EE needs WordPress $minimum_version or later to work properly. " .
-				"The version currently installed is $wp_version.\n" .
-				'Try running `wp core download --force`.'
-			);
-		}
-		// @codingStandardsIgnoreEnd
-	}
-
 	public function init_config() {
 		$configurator = \EE::get_configurator();
 
@@ -826,8 +784,6 @@ class Runner {
 		}
 
 		$this->do_early_invoke( 'before_wp_load' );
-
-		$this->check_wp_version();
 
 		if ( $this->cmd_starts_with( array( 'config', 'create' ) ) ) {
 			$this->_run_command_and_exit();
