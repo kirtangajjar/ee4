@@ -379,30 +379,6 @@ function launch_editor_for_input( $input, $filename = 'EE' ) {
 }
 
 /**
- * @param string MySQL host string, as defined in wp-config.php
- * @return array
- */
-function mysql_host_to_cli_args( $raw_host ) {
-	$assoc_args = array();
-
-	$host_parts = explode( ':',  $raw_host );
-	if ( count( $host_parts ) == 2 ) {
-		list( $assoc_args['host'], $extra ) = $host_parts;
-		$extra = trim( $extra );
-		if ( is_numeric( $extra ) ) {
-			$assoc_args['port'] = (int) $extra;
-			$assoc_args['protocol'] = 'tcp';
-		} elseif ( '' !== $extra ) {
-			$assoc_args['socket'] = $extra;
-		}
-	} else {
-		$assoc_args['host'] = $raw_host;
-	}
-
-	return $assoc_args;
-}
-
-/**
  * Render PHP or other types of files using Mustache templates.
  *
  * IMPORTANT: Automatic HTML escaping is disabled!
