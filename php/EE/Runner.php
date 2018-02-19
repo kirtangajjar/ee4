@@ -540,38 +540,6 @@ class Runner {
 	}
 
 	/**
-	 * Returns wp-config.php code, skipping the loading of wp-settings.php
-	 *
-	 * @return string
-	 */
-	public function get_wp_config_code() {
-		$wp_config_path = Utils\locate_wp_config();
-
-		$wp_config_code = explode( "\n", file_get_contents( $wp_config_path ) );
-
-		$found_wp_settings = false;
-
-		$lines_to_run = array();
-
-		foreach ( $wp_config_code as $line ) {
-			if ( preg_match( '/^\s*require.+wp-settings\.php/', $line ) ) {
-				$found_wp_settings = true;
-				continue;
-			}
-
-			$lines_to_run[] = $line;
-		}
-
-		if ( ! $found_wp_settings ) {
-			EE::error( 'Strange wp-config.php file: wp-settings.php is not loaded directly.' );
-		}
-
-		$source = implode( "\n", $lines_to_run );
-		$source = Utils\replace_path_consts( $source, $wp_config_path );
-		return preg_replace( '|^\s*\<\?php\s*|', '', $source );
-	}
-
-	/**
 	 * Whether or not the output should be rendered in color
 	 *
 	 * @return bool
