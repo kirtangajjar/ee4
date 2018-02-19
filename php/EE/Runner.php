@@ -675,24 +675,6 @@ class Runner {
 	}
 
 	/**
-	 * Whether or not this WordPress install is multisite.
-	 *
-	 * For use after wp-config.php has loaded, but before the rest of WordPress
-	 * is loaded.
-	 */
-	private function is_multisite() {
-		if ( defined( 'MULTISITE' ) ) {
-			return MULTISITE;
-		}
-
-		if ( defined( 'SUBDOMAIN_INSTALL' ) || defined( 'VHOST' ) || defined( 'SUNRISE' ) ) {
-			return true;
-		}
-
-		return false;
-	}
-
-	/**
 	 * Check whether there's a EE update available, and suggest update if so.
 	 */
 	private function auto_check_update() {
