@@ -683,10 +683,6 @@ class Runner {
 			$this->_run_command_and_exit();
 		}
 
-		if ( isset( $this->config['http'] ) && ! class_exists( '\WP_REST_CLI\Runner' ) ) {
-			EE::error( "RESTful EE needs to be installed. Try 'wp package install ee/restful'." );
-		}
-
 		if ( $this->config['ssh'] ) {
 			$this->run_ssh_command( $this->config['ssh'] );
 			return;
@@ -697,63 +693,6 @@ class Runner {
 			$this->auto_check_update();
 			$this->run_command( $this->arguments, $this->assoc_args );
 			// Help didn't exit so failed to find the command at this stage.
-		}
-
-		// Handle --url parameter
-		$url = self::guess_url( $this->config );
-		if ( $url ) {
-			\EE::set_url( $url );
-		}
-
-		$this->do_early_invoke( 'before_wp_load' );
-
-		if ( $this->cmd_starts_with( array( 'config', 'create' ) ) ) {
-			$this->_run_command_and_exit();
-		}
-
-		if ( ! Utils\locate_wp_config() ) {
-			EE::error(
-				"'wp-config.php' not found.\n" .
-				'Either create one manually or use `wp config create`.'
-			);
-		}
-
-		if ( $this->cmd_starts_with( array( 'core', 'is-installed' ) )
-			|| $this->cmd_starts_with( array( 'core', 'update-db' ) ) ) {
-			define( 'WP_INSTALLING', true );
-		}
-
-		if (
-			count( $this->arguments ) >= 2 &&
-			'core' === $this->arguments[0] &&
-			in_array( $this->arguments[1], array( 'install', 'multisite-install' ) )
-		) {
-			define( 'WP_INSTALLING', true );
-
-			// We really need a URL here
-			if ( ! isset( $_SERVER['HTTP_HOST'] ) ) {
-				$url = 'http://example.com';
-				\EE::set_url( $url );
-			}
-
-			if ( 'multisite-install' == $this->arguments[1] ) {
-				// need to fake some globals to skip the checks in wp-includes/ms-settings.php
-				$url_parts = Utils\parse_url( $url );
-				self::fake_current_site_blog( $url_parts );
-
-				if ( ! defined( 'COOKIEHASH' ) ) {
-					define( 'COOKIEHASH', md5( $url_parts['host'] ) );
-				}
-			}
-		}
-
-		if ( $this->cmd_starts_with( array( 'import' ) ) ) {
-			define( 'WP_LOAD_IMPORTERS', true );
-			define( 'WP_IMPORTING', true );
-		}
-
-		if ( $this->cmd_starts_with( array( 'cron', 'event', 'run' ) ) ) {
-			define( 'DOING_CRON', true );
 		}
 
 		$this->_run_command_and_exit();
