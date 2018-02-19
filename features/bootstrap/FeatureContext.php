@@ -161,16 +161,6 @@ class FeatureContext extends BehatContext implements ClosuredContextInterface {
 		echo PHP_EOL;
 		echo $result->stdout;
 		echo PHP_EOL;
-		$result = Process::create( Utils\esc_cmd( 'wp core version --path=%s', self::$cache_dir ) , null, self::get_process_env_variables() )->run_check();
-		echo 'WordPress ' . $result->stdout;
-		echo PHP_EOL;
-
-		// Remove install cache if any (not setting the static var).
-		$wp_version_suffix = ( $wp_version = getenv( 'WP_VERSION' ) ) ? "-$wp_version" : '';
-		$install_cache_dir = sys_get_temp_dir() . '/ee-test-core-install-cache' . $wp_version_suffix;
-		if ( file_exists( $install_cache_dir ) ) {
-			self::remove_dir( $install_cache_dir );
-		}
 	}
 
 	/**
