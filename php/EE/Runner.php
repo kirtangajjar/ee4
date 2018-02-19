@@ -570,24 +570,6 @@ class Runner {
 		return $this->_required_files;
 	}
 
-	/**
-	 * Do WordPress core files exist?
-	 *
-	 * @return bool
-	 */
-	private function wp_exists() {
-		return file_exists( ABSPATH . 'wp-includes/version.php' );
-	}
-
-	/**
-	 * Are WordPress core files readable?
-	 *
-	 * @return bool
-	 */
-	private function wp_is_readable() {
-		return is_readable( ABSPATH . 'wp-includes/version.php' );
-	}
-
 	public function init_config() {
 		$configurator = \EE::get_configurator();
 
@@ -767,11 +749,7 @@ class Runner {
 		self::set_wp_root( $this->find_wp_root() );
 
 		// First try at showing man page - if help command and either haven't found 'version.php' or 'wp-config.php' (so won't be loading WP & adding commands) or help on subcommand.
-		if ( $this->cmd_starts_with( array( 'help' ) )
-			&& ( ! $this->wp_exists()
-				|| ! Utils\locate_wp_config()
-				|| count( $this->arguments ) > 2
-			) ) {
+		if ( $this->cmd_starts_with( array( 'help' ) ) ) {
 			$this->auto_check_update();
 			$this->run_command( $this->arguments, $this->assoc_args );
 			// Help didn't exit so failed to find the command at this stage.
