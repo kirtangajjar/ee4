@@ -225,26 +225,6 @@ function esc_cmd( $cmd ) {
 	return vsprintf( $cmd, array_map( 'escapeshellarg', $args ) );
 }
 
-function locate_wp_config() {
-	static $path;
-
-	if ( null === $path ) {
-		$path = false;
-
-		if ( file_exists( ABSPATH . 'wp-config.php' ) ) {
-			$path = ABSPATH . 'wp-config.php';
-		} elseif ( file_exists( ABSPATH . '../wp-config.php' ) && ! file_exists( ABSPATH . '/../wp-settings.php' ) ) {
-			$path = ABSPATH . '../wp-config.php';
-		}
-
-		if ( $path ) {
-			$path = realpath( $path );
-		}
-	}
-
-	return $path;
-}
-
 function wp_version_compare( $since, $operator ) {
 	$wp_version = str_replace( '-src', '', $GLOBALS['wp_version'] );
 	$since = str_replace( '-src', '', $since );
