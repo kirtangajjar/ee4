@@ -519,6 +519,8 @@ class Runner {
 		{
 			list( $args, $assoc_args, $this->runtime_config ) = $configurator->parse_args( $argv );
 
+			list( $this->arguments, $this->assoc_args ) = [ $args, $assoc_args ];
+
 			$configurator->merge_array( $this->runtime_config );
 		}
 
