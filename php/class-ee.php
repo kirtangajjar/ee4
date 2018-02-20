@@ -93,38 +93,6 @@ class EE {
 	}
 
 	/**
-	 * Set the context in which EE should be run
-	 */
-	public static function set_url( $url ) {
-		EE::debug( 'Set URL: ' . $url, 'bootstrap' );
-		$url_parts = Utils\parse_url( $url );
-		self::set_url_params( $url_parts );
-	}
-
-	private static function set_url_params( $url_parts ) {
-		$f = function( $key ) use ( $url_parts ) {
-			return \EE\Utils\get_flag_value( $url_parts, $key, '' );
-		};
-
-		if ( isset( $url_parts['host'] ) ) {
-			if ( isset( $url_parts['scheme'] ) && 'https' === strtolower( $url_parts['scheme'] ) ) {
-				$_SERVER['HTTPS'] = 'on';
-			}
-
-			$_SERVER['HTTP_HOST'] = $url_parts['host'];
-			if ( isset( $url_parts['port'] ) ) {
-				$_SERVER['HTTP_HOST'] .= ':' . $url_parts['port'];
-			}
-
-			$_SERVER['SERVER_NAME'] = $url_parts['host'];
-		}
-
-		$_SERVER['REQUEST_URI'] = $f( 'path' ) . ( isset( $url_parts['query'] ) ? '?' . $url_parts['query'] : '' );
-		$_SERVER['SERVER_PORT'] = \EE\Utils\get_flag_value( $url_parts, 'port', '80' );
-		$_SERVER['QUERY_STRING'] = $f( 'query' );
-	}
-
-	/**
 	 * Colorize a string for output.
 	 *
 	 * Yes, you too can change the color of command line text. For instance,
