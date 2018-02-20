@@ -12,11 +12,11 @@ return array(
 
 	# Used by wp-cli to control wp site remotely.
 	# Might be useful in future for controlling ee remotely.
-	'http' => array(
-		'runtime' => '=<http>',
-		'file' => '<http>',
-		'desc' => 'Reserved for future.',
-	),
+	// 'http' => array(
+	// 	'runtime' => '=<http>',
+	// 	'file' => '<http>',
+	// 	'desc' => 'Reserved for future.',
+	// ),
 
 	'skip-packages' => array(
 		'runtime'   => '',
