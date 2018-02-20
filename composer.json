@@ -43,14 +43,6 @@
 		"wp-cli/php-cli-tools": "~0.11.2",
 		"ee/site-command": "dev-master"
 	},
-	"require-dev": {
-		"behat/behat": "2.5.*",
-		"dealerdirect/phpcodesniffer-composer-installer": "^0.4.3",
-		"phpunit/phpunit": "3.7.*",
-		"roave/security-advisories": "dev-master",
-		"wimg/php-compatibility": "^8.0",
-		"wp-coding-standards/wpcs": "^0.13.1"
-	},
 	"suggest": {
 		"psy/psysh": "Enhanced `wp shell` functionality"
 	},
