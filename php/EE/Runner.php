@@ -156,6 +156,10 @@ class Runner {
 		return $packages_dir;
 	}
 
+	private function cmd_starts_with( $prefix ) {
+		return array_slice( $this->arguments, 0, count( $prefix ) ) === $prefix;
+	}
+
 	/**
 	 * Given positional arguments, find the command to execute.
 	 *
