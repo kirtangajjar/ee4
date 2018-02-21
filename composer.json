@@ -1,5 +1,5 @@
 {
-	"name": "wp-cli/ee",
+	"name": "easyengine/ee",
 	"description": "The command line interface for WordPress",
 	"keywords": [ "cli", "wordpress" ],
 	"homepage": "https://ee.org",
@@ -10,7 +10,7 @@
 		"docs": "https://make.wordpress.org/cli/handbook/"
 	},
 	"bin": [
-		"bin/wp.bat", "bin/wp"
+		"bin/ee.bat", "bin/ee"
 	],
 	"config": {
 		"platform": {
