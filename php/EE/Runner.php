@@ -97,7 +97,7 @@ class Runner {
 			$config_path = getenv( 'EE_CONFIG_PATH' );
 			$this->_global_config_path_debug = 'Using global config from EE_CONFIG_PATH env var: ' . $config_path;
 		} else {
-			$config_path = Utils\get_home_dir() . '/.ee/config.yml';
+			$config_path = Utils\get_home_dir() . '/.ee4/config.yml';
 			$this->_global_config_path_debug = 'Using default global config: ' . $config_path;
 		}
 
@@ -548,7 +548,7 @@ class Runner {
 		if ( getenv( 'EE_CONFIG_PATH' ) ) {
 			$config_path = getenv( 'EE_CONFIG_PATH' );
 		} else {
-			$config_path = Utils\get_home_dir() . '/.ee/config.yml';
+			$config_path = Utils\get_home_dir() . '/.ee4/config.yml';
 		}
 		$config_path = escapeshellarg( $config_path );
 

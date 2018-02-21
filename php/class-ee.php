@@ -816,7 +816,7 @@ class EE {
 		if ( getenv( 'EE_CONFIG_PATH' ) ) {
 			$config_path = getenv( 'EE_CONFIG_PATH' );
 		} else {
-			$config_path = Utils\get_home_dir() . '/.ee/config.yml';
+			$config_path = Utils\get_home_dir() . '/.ee4/config.yml';
 		}
 		$config_path = escapeshellarg( $config_path );
 
