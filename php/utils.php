@@ -407,20 +407,6 @@ function mustache_render( $template_name, $data = array() ) {
  * advances with `$progress->tick()`, and completes with `$progress->finish()`.
  * Process bar also indicates elapsed time and expected total time.
  *
- * ```
- * # `wp user generate` ticks progress bar each time a new user is created.
- * #
- * # $ wp user generate --count=500
- * # Generating users  22 % [=======>                             ] 0:05 / 0:23
- *
- * $progress = \EE\Utils\make_progress_bar( 'Generating users', $count );
- * for ( $i = 0; $i < $count; $i++ ) {
- *     // uses wp_insert_user() to insert the user
- *     $progress->tick();
- * }
- * $progress->finish();
- * ```
- *
  * @access public
  * @category Output
  *
@@ -478,15 +464,6 @@ function replace_path_consts( $source, $path ) {
  * Make a HTTP request to a remote URL.
  *
  * Wraps the Requests HTTP library to ensure every request includes a cert.
- *
- * ```
- * # `wp core download` verifies the hash for a downloaded WordPress archive
- *
- * $md5_response = Utils\http_request( 'GET', $download_url . '.md5' );
- * if ( 20 != substr( $md5_response->status_code, 0, 2 ) ) {
- *      EE::error( "Couldn't access md5 hash for release (HTTP code {$response->status_code})" );
- * }
- * ```
  *
  * @access public
  *

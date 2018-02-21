@@ -129,12 +129,7 @@ class Runner {
 			$config_files,
 			getcwd(),
 			function ( $dir ) {
-				static $wp_load_count = 0;
-				$wp_load_path = $dir . DIRECTORY_SEPARATOR . 'wp-load.php';
-				if ( file_exists( $wp_load_path ) ) {
-					++ $wp_load_count;
-				}
-				return $wp_load_count > 1;
+				return false;
 			}
 		);
 
@@ -162,34 +157,6 @@ class Runner {
 	}
 
 	/**
-	 * Attempts to find the path to the WP install inside index.php
-	 *
-	 * @param string $index_path
-	 * @return string|false
-	 */
-	private static function extract_subdir_path( $index_path ) {
-		$index_code = file_get_contents( $index_path );
-
-		if ( ! preg_match( '|^\s*require\s*\(?\s*(.+?)/wp-blog-header\.php([\'"])|m', $index_code, $matches ) ) {
-			return false;
-		}
-
-		$wp_path_src = $matches[1] . $matches[2];
-		$wp_path_src = Utils\replace_path_consts( $wp_path_src, $index_path );
-		$wp_path = eval( "return $wp_path_src;" );
-
-		if ( ! Utils\is_path_absolute( $wp_path ) ) {
-			$wp_path = dirname( $index_path ) . "/$wp_path";
-		}
-
-		return $wp_path;
-	}
-
-	private function cmd_starts_with( $prefix ) {
-		return array_slice( $this->arguments, 0, count( $prefix ) ) === $prefix;
-	}
-
-	/**
 	 * Given positional arguments, find the command to execute.
 	 *
 	 * @param array $args
@@ -214,7 +181,7 @@ class Runner {
 					$parent_name = implode( ' ', $cmd_path );
 					$suggestion = $this->get_subcommand_suggestion( $child, $command );
 					return sprintf(
-						"'%s' is not a registered subcommand of '%s'. See 'wp help %s' for available subcommands.%s",
+						"'%s' is not a registered subcommand of '%s'. See 'ee help %s' for available subcommands.%s",
 						$child,
 						$parent_name,
 						$parent_name,
@@ -225,7 +192,7 @@ class Runner {
 				$suggestion = $this->get_subcommand_suggestion( $full_name, $command );
 
 				return sprintf(
-					"'%s' is not a registered wp command. See 'wp help' for available commands.%s",
+					"'%s' is not a registered ee command. See 'ee help' for available commands.%s",
 					$full_name,
 					! empty( $suggestion ) ? PHP_EOL . "Did you mean '{$suggestion}'?" : ''
 				);
@@ -334,11 +301,11 @@ class Runner {
 			$env_vars .= 'EE_STRICT_ARGS_MODE=1 ';
 		}
 
-		$wp_binary = 'wp';
-		$wp_args = array_slice( $GLOBALS['argv'], 1 );
+		$ee_binary = 'ee';
+		$ee_args = array_slice( $GLOBALS['argv'], 1 );
 
-		if ( $this->alias && ! empty( $wp_args[0] ) && $this->alias === $wp_args[0] ) {
-			array_shift( $wp_args );
+		if ( $this->alias && ! empty( $ee_args[0] ) && $this->alias === $ee_args[0] ) {
+			array_shift( $ee_args );
 			$runtime_alias = array();
 			foreach ( $this->aliases[ $this->alias ] as $key => $value ) {
 				if ( 'ssh' === $key ) {
@@ -352,18 +319,18 @@ class Runner {
 						$this->alias => $runtime_alias,
 					)
 				);
-				$wp_binary = "EE_RUNTIME_ALIAS='{$encoded_alias}' {$wp_binary} {$this->alias}";
+				$ee_binary = "EE_RUNTIME_ALIAS='{$encoded_alias}' {$ee_binary} {$this->alias}";
 			}
 		}
 
-		foreach ( $wp_args as $k => $v ) {
+		foreach ( $ee_args as $k => $v ) {
 			if ( preg_match( '#--ssh=#', $v ) ) {
-				unset( $wp_args[ $k ] );
+				unset( $ee_args[ $k ] );
 			}
 		}
 
-		$wp_command = $pre_cmd . $env_vars . $wp_binary . ' ' . implode( ' ', array_map( 'escapeshellarg', $wp_args ) );
-		$escaped_command = $this->generate_ssh_command( $bits, $wp_command );
+		$ee_command = $pre_cmd . $env_vars . $ee_binary . ' ' . implode( ' ', array_map( 'escapeshellarg', $ee_args ) );
+		$escaped_command = $this->generate_ssh_command( $bits, $ee_command );
 
 		passthru( $escaped_command, $exit_code );
 		if ( 255 === $exit_code ) {
@@ -377,10 +344,10 @@ class Runner {
 	 * Generate a shell command from the parsed connection string.
 	 *
 	 * @param array  $bits       Parsed connection string.
-	 * @param string $wp_command EE command to run.
+	 * @param string $ee_command EE command to run.
 	 * @return string
 	 */
-	private function generate_ssh_command( $bits, $wp_command ) {
+	private function generate_ssh_command( $bits, $ee_command ) {
 		$escaped_command = '';
 
 		// Set default values.
@@ -402,7 +369,7 @@ class Runner {
 				$bits['user'] ? '--user ' . escapeshellarg( $bits['user'] ) . ' ' : '',
 				$is_tty ? '-t ' : '',
 				escapeshellarg( $bits['host'] ),
-				escapeshellarg( $wp_command )
+				escapeshellarg( $ee_command )
 			);
 		}
 
@@ -414,7 +381,7 @@ class Runner {
 				$bits['user'] ? '--user ' . escapeshellarg( $bits['user'] ) . ' ' : '',
 				$is_tty ? '' : '-T ',
 				escapeshellarg( $bits['host'] ),
-				escapeshellarg( $wp_command )
+				escapeshellarg( $ee_command )
 			);
 		}
 
@@ -424,7 +391,7 @@ class Runner {
 
 			$escaped_command = sprintf(
 				$command,
-				escapeshellarg( $wp_command ),
+				escapeshellarg( $ee_command ),
 				escapeshellarg( $bits['host'] )
 			);
 		}
@@ -442,7 +409,7 @@ class Runner {
 				$bits['port'] ? '-p ' . (int) $bits['port'] . ' ' : '',
 				escapeshellarg( $bits['host'] ),
 				$is_tty ? '-t' : '-T',
-				escapeshellarg( $wp_command )
+				escapeshellarg( $ee_command )
 			);
 		}
 
@@ -562,7 +529,7 @@ class Runner {
 			"If you'd like to run it as the user that this site is under, you can " .
 			"run the following to become the respective user:\n" .
 			"\n" .
-			"    sudo -u USER -i -- wp <command>\n" .
+			"    sudo -u USER -i -- ee <command>\n" .
 			"\n"
 		);
 	}
@@ -605,7 +572,7 @@ class Runner {
 
 	public function start() {
 
-		// Enable PHP error reporting to stderr if testing. Will need to be re-enabled after WP loads.
+		// Enable PHP error reporting to stderr if testing.
 		if ( getenv( 'BEHAT_RUN' ) ) {
 			$this->enable_error_reporting();
 		}
@@ -665,7 +632,7 @@ class Runner {
 			return;
 		}
 
-		// First try at showing man page - if help command and either haven't found 'version.php' or 'wp-config.php' (so won't be loading WP & adding commands) or help on subcommand.
+		// First try at showing man page.
 		if ( $this->cmd_starts_with( array( 'help' ) ) ) {
 			$this->auto_check_update();
 			$this->run_command( $this->arguments, $this->assoc_args );
@@ -681,7 +648,7 @@ class Runner {
 	 */
 	private function auto_check_update() {
 
-		// `wp cli update` only works with Phars at this time.
+		// `ee cli update` only works with Phars at this time.
 		if ( ! Utils\inside_phar() ) {
 			return;
 		}

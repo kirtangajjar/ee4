@@ -162,26 +162,12 @@ class EE {
 	 * * `before_invoke:<command>` - Just before a command is invoked.
 	 * * `after_invoke:<command>` - Just after a command is invoked.
 	 * * `find_command_to_run_pre` - Just before EE finds the command to run.
-	 * * `before_wp_load` - Just before the WP load process begins.
-	 * * `before_wp_config_load` - After wp-config.php has been located.
-	 * * `after_wp_config_load` - After wp-config.php has been loaded into scope.
-	 * * `after_wp_load` - Just after the WP load process has completed.
 	 *
 	 * EE commands can create their own hooks with `EE::do_hook()`.
 	 *
 	 * If additional arguments are passed through the `EE::do_hook()` call,
 	 * these will be passed on to the callback provided by `EE::add_hook()`.
 	 *
-	 * ```
-	 * # `wp network meta` confirms command is executing in multisite context.
-	 * EE::add_command( 'network meta', 'Network_Meta_Command', array(
-	 *    'before_invoke' => function () {
-	 *        if ( !is_multisite() ) {
-	 *            EE::error( 'This is not a multisite install.' );
-	 *        }
-	 *    }
-	 * ) );
-	 * ```
 	 *
 	 * @access public
 	 * @category Registration
@@ -241,7 +227,7 @@ class EE {
 	 * ```
 	 * # Register a custom 'foo' command to output a supplied positional param.
 	 * #
-	 * # $ wp foo bar --append=qux
+	 * # $ ee foo bar --append=qux
 	 * # Success: bar qux
 	 *
 	 * /**
@@ -252,8 +238,6 @@ class EE {
 	 *  *
 	 *  * --append=<message>
 	 *  * : An awesome message to append to the original message.
-	 *  *
-	 *  * @when before_wp_load
 	 *  *\/
 	 * $foo = function( $args, $assoc_args ) {
 	 *     EE::success( $args[0] . ' ' . $assoc_args['append'] );
@@ -274,7 +258,7 @@ class EE {
 	 *    @type string   $shortdesc     Short description (80 char or less) for the command.
 	 *    @type string   $longdesc      Description of arbitrary length for examples, etc.
 	 *    @type string   $synopsis      The synopsis for the command (string or array).
-	 *    @type string   $when          Execute callback on a named EE hook (e.g. before_wp_load).
+	 *    @type string   $when          Execute callback on a named EE hook.
 	 *    @type bool     $is_deferred   Whether the command addition had already been deferred.
 	 * }
 	 * @return true True on success, false if deferred, hard error if registration failed.
@@ -298,7 +282,7 @@ class EE {
 				$callable[0] = is_object( $callable[0] ) ? get_class( $callable[0] ) : $callable[0];
 				$callable = array( $callable[0], $callable[1] );
 			}
-			EE::error( sprintf( 'Callable %s does not exist, and cannot be registered as `wp %s`.', json_encode( $callable ), $name ) );
+			EE::error( sprintf( 'Callable %s does not exist, and cannot be registered as `ee %s`.', json_encode( $callable ), $name ) );
 		}
 
 		$addition = new Dispatcher\CommandAddition();
@@ -497,7 +481,7 @@ class EE {
 	 * Message is written to STDOUT, or discarded when `--quiet` flag is supplied.
 	 *
 	 * ```
-	 * # `wp cli update` lets user know of each step in the update process.
+	 * # `ee cli update` lets user know of each step in the update process.
 	 * EE::log( sprintf( 'Downloading from %s...', $download_url ) );
 	 * ```
 	 *
@@ -517,16 +501,6 @@ class EE {
 	 *
 	 * Typically recommended to inform user of successful script conclusion.
 	 *
-	 * ```
-	 * # wp rewrite flush expects 'rewrite_rules' option to be set after flush.
-	 * flush_rewrite_rules( \EE\Utils\get_flag_value( $assoc_args, 'hard' ) );
-	 * if ( ! get_option( 'rewrite_rules' ) ) {
-	 *     EE::warning( "Rewrite rules are empty." );
-	 * } else {
-	 *     EE::success( 'Rewrite rules flushed.' );
-	 * }
-	 * ```
-	 *
 	 * @access public
 	 * @category Output
 	 *
@@ -544,20 +518,6 @@ class EE {
 	 *
 	 * Helpful for optionally showing greater detail when needed. Used throughout
 	 * EE bootstrap process for easier debugging and profiling.
-	 *
-	 * ```
-	 * # Called in `EE\Runner::set_wp_root()`.
-	 * private static function set_wp_root( $path ) {
-	 *     define( 'ABSPATH', Utils\trailingslashit( $path ) );
-	 *     EE::debug( 'ABSPATH defined: ' . ABSPATH );
-	 *     $_SERVER['DOCUMENT_ROOT'] = realpath( $path );
-	 * }
-	 *
-	 * # Debug details only appear when `--debug` is used.
-	 * # $ wp --debug
-	 * # [...]
-	 * # Debug: ABSPATH defined: /srv/www/wordpress-develop.dev/src/ (0.225s)
-	 * ```
 	 *
 	 * @access public
 	 * @category Output
@@ -578,16 +538,6 @@ class EE {
 	 * Use instead of `EE::debug()` when script execution should be permitted
 	 * to continue.
 	 *
-	 * ```
-	 * # `wp plugin activate` skips activation when plugin is network active.
-	 * $status = $this->get_status( $plugin->file );
-	 * // Network-active is the highest level of activation status
-	 * if ( 'active-network' === $status ) {
-	 *   EE::warning( "Plugin '{$plugin->name}' is already network active." );
-	 *   continue;
-	 * }
-	 * ```
-	 *
 	 * @access public
 	 * @category Output
 	 *
@@ -607,17 +557,10 @@ class EE {
 	 * Use `EE::warning()` instead when script execution should be permitted
 	 * to continue.
 	 *
-	 * ```
-	 * # `wp cache flush` considers flush failure to be a fatal error.
-	 * if ( false === wp_cache_flush() ) {
-	 *     EE::error( 'The object cache could not be flushed.' );
-	 * }
-	 * ```
-	 *
 	 * @access public
 	 * @category Output
 	 *
-	 * @param string|WP_Error  $message Message to write to STDERR.
+	 * @param string|EE_Error  $message Message to write to STDERR.
 	 * @param boolean|integer  $exit    True defaults to exit(1).
 	 * @return null
 	 */
@@ -680,12 +623,6 @@ class EE {
 	 * If 'y' is provided to the question, the script execution continues and returns true. If
 	 * 'n' or any other response is provided to the question, script exits if
 	 * $exit is set to true. Otherwise the script returns false.
-	 *
-	 * ```
-	 * # `wp db drop` asks for confirmation before dropping the database.
-	 *
-	 * EE::confirm( "Are you sure you want to drop the database?", $assoc_args );
-	 * ```
 	 *
 	 * @access public
 	 * @category Input
@@ -773,7 +710,7 @@ class EE {
 	}
 
 	/**
-	 * Convert a wp_error into a string
+	 * Convert a EE_error into a string
 	 *
 	 * @param mixed $errors
 	 * @return string
@@ -792,7 +729,7 @@ class EE {
 			return '"' . $data . '"';
 		};
 
-		if ( is_object( $errors ) && is_a( $errors, 'WP_Error' ) ) {
+		if ( is_object( $errors ) && is_a( $errors, 'EE_Error' ) ) {
 			foreach ( $errors->get_error_messages() as $message ) {
 				if ( $errors->get_error_data() ) {
 					return $message . ' ' . $render_data( $errors->get_error_data() );
@@ -805,15 +742,6 @@ class EE {
 
 	/**
 	 * Launch an arbitrary external process that takes over I/O.
-	 *
-	 * ```
-	 * # `wp core download` falls back to the `tar` binary when PharData isn't available
-	 * if ( ! class_exists( 'PharData' ) ) {
-	 *     $cmd = "tar xz --strip-components=1 --directory=%s -f $tarball";
-	 *     EE::launch( Utils\esc_cmd( $cmd, $dest ) );
-	 *     return;
-	 * }
-	 * ```
 	 *
 	 * @access public
 	 * @category Execution

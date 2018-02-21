@@ -22,8 +22,6 @@ use \EE\Utils;
  *     Downloading from https://github.com/ee/ee/releases/download/v0.24.1/ee-0.24.1.phar...
  *     New version works. Proceeding to replace.
  *     Success: Updated EE to 0.24.1.
- *
- * @when before_wp_load
  */
 class CLI_Command extends EE_Command {
 
@@ -137,13 +135,13 @@ class CLI_Command extends EE_Command {
 				array( 'PHP binary', $php_bin ),
 				array( 'PHP version', PHP_VERSION ),
 				array( 'php.ini used', get_cfg_var( 'cfg_file_path' ) ),
-				array( 'EE root dir', WP_CLI_ROOT ),
-				array( 'EE vendor dir', WP_CLI_VENDOR_DIR ),
-				array( 'EE phar path', ( defined( 'WP_CLI_PHAR_PATH' ) ? WP_CLI_PHAR_PATH : '' ) ),
+				array( 'EE root dir', EE_ROOT ),
+				array( 'EE vendor dir', EE_VENDOR_DIR ),
+				array( 'EE phar path', ( defined( 'EE_PHAR_PATH' ) ? EE_PHAR_PATH : '' ) ),
 				array( 'EE packages dir', $packages_dir ),
 				array( 'EE global config', $runner->global_config_path ),
 				array( 'EE project config', $runner->project_config_path ),
-				array( 'EE version', WP_CLI_VERSION ),
+				array( 'EE version', EE_VERSION ),
 			);
 
 			$info_table = new \cli\Table();
@@ -267,183 +265,187 @@ class CLI_Command extends EE_Command {
 	 *     Success: Updated EE to 0.24.1.
 	 */
 	public function update( $_, $assoc_args ) {
-		if ( ! Utils\inside_phar() ) {
-			EE::error( 'You can only self-update Phar files.' );
-		}
+		// TODO: Update procedure to update EE
+		// 
+		// if ( ! Utils\inside_phar() ) {
+		// 	EE::error( 'You can only self-update Phar files.' );
+		// }
 
-		$old_phar = realpath( $_SERVER['argv'][0] );
+		// $old_phar = realpath( $_SERVER['argv'][0] );
 
-		if ( ! is_writable( $old_phar ) ) {
-			EE::error( sprintf( '%s is not writable by current user.', $old_phar ) );
-		} elseif ( ! is_writable( dirname( $old_phar ) ) ) {
-			EE::error( sprintf( '%s is not writable by current user.', dirname( $old_phar ) ) );
-		}
+		// if ( ! is_writable( $old_phar ) ) {
+		// 	EE::error( sprintf( '%s is not writable by current user.', $old_phar ) );
+		// } elseif ( ! is_writable( dirname( $old_phar ) ) ) {
+		// 	EE::error( sprintf( '%s is not writable by current user.', dirname( $old_phar ) ) );
+		// }
 
-		if ( Utils\get_flag_value( $assoc_args, 'nightly' ) ) {
-			EE::confirm( sprintf( 'You have version %s. Would you like to update to the latest nightly?', EE_VERSION ), $assoc_args );
-			$download_url = 'https://raw.githubusercontent.com/ee/builds/gh-pages/phar/ee-nightly.phar';
-			$md5_url = 'https://raw.githubusercontent.com/ee/builds/gh-pages/phar/ee-nightly.phar.md5';
-		} elseif ( Utils\get_flag_value( $assoc_args, 'stable' ) ) {
-			EE::confirm( sprintf( 'You have version %s. Would you like to update to the latest stable release?', EE_VERSION ), $assoc_args );
-			$download_url = 'https://raw.githubusercontent.com/ee/builds/gh-pages/phar/ee.phar';
-			$md5_url = 'https://raw.githubusercontent.com/ee/builds/gh-pages/phar/ee.phar.md5';
-		} else {
+		// if ( Utils\get_flag_value( $assoc_args, 'nightly' ) ) {
+		// 	EE::confirm( sprintf( 'You have version %s. Would you like to update to the latest nightly?', EE_VERSION ), $assoc_args );
+		// 	$download_url = 'https://raw.githubusercontent.com/ee/builds/gh-pages/phar/ee-nightly.phar';
+		// 	$md5_url = 'https://raw.githubusercontent.com/ee/builds/gh-pages/phar/ee-nightly.phar.md5';
+		// } elseif ( Utils\get_flag_value( $assoc_args, 'stable' ) ) {
+		// 	EE::confirm( sprintf( 'You have version %s. Would you like to update to the latest stable release?', EE_VERSION ), $assoc_args );
+		// 	$download_url = 'https://raw.githubusercontent.com/ee/builds/gh-pages/phar/ee.phar';
+		// 	$md5_url = 'https://raw.githubusercontent.com/ee/builds/gh-pages/phar/ee.phar.md5';
+		// } else {
 
-			$updates = $this->get_updates( $assoc_args );
+		// 	$updates = $this->get_updates( $assoc_args );
 
-			if ( empty( $updates ) ) {
-				$update_type = $this->get_update_type_str( $assoc_args );
-				EE::success( "EE is at the latest{$update_type}version." );
-				return;
-			}
+		// 	if ( empty( $updates ) ) {
+		// 		$update_type = $this->get_update_type_str( $assoc_args );
+		// 		EE::success( "EE is at the latest{$update_type}version." );
+		// 		return;
+		// 	}
 
-			$newest = $updates[0];
+		// 	$newest = $updates[0];
 
-			EE::confirm( sprintf( 'You have version %s. Would you like to update to %s?', EE_VERSION, $newest['version'] ), $assoc_args );
+		// 	EE::confirm( sprintf( 'You have version %s. Would you like to update to %s?', EE_VERSION, $newest['version'] ), $assoc_args );
 
-			$download_url = $newest['package_url'];
-			$md5_url = str_replace( '.phar', '.phar.md5', $download_url );
-		}
+		// 	$download_url = $newest['package_url'];
+		// 	$md5_url = str_replace( '.phar', '.phar.md5', $download_url );
+		// }
 
-		EE::log( sprintf( 'Downloading from %s...', $download_url ) );
+		// EE::log( sprintf( 'Downloading from %s...', $download_url ) );
 
-		$temp = \EE\Utils\get_temp_dir() . uniqid( 'wp_', true ) . '.phar';
+		// $temp = \EE\Utils\get_temp_dir() . uniqid( 'ee_', true ) . '.phar';
 
-		$headers = array();
-		$options = array(
-			'timeout' => 600,  // 10 minutes ought to be enough for everybody.
-			'filename' => $temp,
-		);
+		// $headers = array();
+		// $options = array(
+		// 	'timeout' => 600,  // 10 minutes ought to be enough for everybody.
+		// 	'filename' => $temp,
+		// );
 
-		Utils\http_request( 'GET', $download_url, null, $headers, $options );
+		// Utils\http_request( 'GET', $download_url, null, $headers, $options );
 
-		$md5_response = Utils\http_request( 'GET', $md5_url );
-		if ( 20 != substr( $md5_response->status_code, 0, 2 ) ) {
-			EE::error( "Couldn't access md5 hash for release (HTTP code {$md5_response->status_code})." );
-		}
-		$md5_file = md5_file( $temp );
-		$release_hash = trim( $md5_response->body );
-		if ( $md5_file === $release_hash ) {
-			EE::log( 'md5 hash verified: ' . $release_hash );
-		} else {
-			EE::error( "md5 hash for download ({$md5_file}) is different than the release hash ({$release_hash})." );
-		}
+		// $md5_response = Utils\http_request( 'GET', $md5_url );
+		// if ( 20 != substr( $md5_response->status_code, 0, 2 ) ) {
+		// 	EE::error( "Couldn't access md5 hash for release (HTTP code {$md5_response->status_code})." );
+		// }
+		// $md5_file = md5_file( $temp );
+		// $release_hash = trim( $md5_response->body );
+		// if ( $md5_file === $release_hash ) {
+		// 	EE::log( 'md5 hash verified: ' . $release_hash );
+		// } else {
+		// 	EE::error( "md5 hash for download ({$md5_file}) is different than the release hash ({$release_hash})." );
+		// }
 
-		$allow_root = EE::get_runner()->config['allow-root'] ? '--allow-root' : '';
-		$php_binary = Utils\get_php_binary();
-		$process = EE\Process::create( "{$php_binary} $temp --info {$allow_root}" );
-		$result = $process->run();
-		if ( 0 !== $result->return_code || false === stripos( $result->stdout, 'EE version:' ) ) {
-			$multi_line = explode( PHP_EOL, $result->stderr );
-			EE::error_multi_line( $multi_line );
-			EE::error( 'The downloaded PHAR is broken, try running ee cli update again.' );
-		}
+		// $allow_root = EE::get_runner()->config['allow-root'] ? '--allow-root' : '';
+		// $php_binary = Utils\get_php_binary();
+		// $process = EE\Process::create( "{$php_binary} $temp --info {$allow_root}" );
+		// $result = $process->run();
+		// if ( 0 !== $result->return_code || false === stripos( $result->stdout, 'EE version:' ) ) {
+		// 	$multi_line = explode( PHP_EOL, $result->stderr );
+		// 	EE::error_multi_line( $multi_line );
+		// 	EE::error( 'The downloaded PHAR is broken, try running ee cli update again.' );
+		// }
 
-		EE::log( 'New version works. Proceeding to replace.' );
+		// EE::log( 'New version works. Proceeding to replace.' );
 
-		$mode = fileperms( $old_phar ) & 511;
+		// $mode = fileperms( $old_phar ) & 511;
 
-		if ( false === chmod( $temp, $mode ) ) {
-			EE::error( sprintf( 'Cannot chmod %s.', $temp ) );
-		}
+		// if ( false === chmod( $temp, $mode ) ) {
+		// 	EE::error( sprintf( 'Cannot chmod %s.', $temp ) );
+		// }
 
-		class_exists( '\cli\Colors' ); // This autoloads \cli\Colors - after we move the file we no longer have access to this class.
+		// class_exists( '\cli\Colors' ); // This autoloads \cli\Colors - after we move the file we no longer have access to this class.
 
-		if ( false === rename( $temp, $old_phar ) ) {
-			EE::error( sprintf( 'Cannot move %s to %s', $temp, $old_phar ) );
-		}
+		// if ( false === rename( $temp, $old_phar ) ) {
+		// 	EE::error( sprintf( 'Cannot move %s to %s', $temp, $old_phar ) );
+		// }
 
-		if ( Utils\get_flag_value( $assoc_args, 'nightly' ) ) {
-			$updated_version = 'the latest nightly release';
-		} elseif ( Utils\get_flag_value( $assoc_args, 'stable' ) ) {
-			$updated_version = 'the latest stable release';
-		} else {
-			$updated_version = $newest['version'];
-		}
-		EE::success( sprintf( 'Updated EE to %s.', $updated_version ) );
+		// if ( Utils\get_flag_value( $assoc_args, 'nightly' ) ) {
+		// 	$updated_version = 'the latest nightly release';
+		// } elseif ( Utils\get_flag_value( $assoc_args, 'stable' ) ) {
+		// 	$updated_version = 'the latest stable release';
+		// } else {
+		// 	$updated_version = $newest['version'];
+		// }
+		// EE::success( sprintf( 'Updated EE to %s.', $updated_version ) );
 	}
 
 	/**
 	 * Returns update information.
 	 */
 	private function get_updates( $assoc_args ) {
-		$url = 'https://api.github.com/repos/ee/ee/releases?per_page=100';
+		// TODO: update URLs
+		// 
+		// $url = 'https://api.github.com/repos/ee/ee/releases?per_page=100';
 
-		$options = array(
-			'timeout' => 30,
-		);
+		// $options = array(
+		// 	'timeout' => 30,
+		// );
 
-		$headers = array(
-			'Accept' => 'application/json',
-		);
-		if ( $github_token = getenv( 'GITHUB_TOKEN' ) ) {
-			$headers['Authorization'] = 'token ' . $github_token;
-		}
+		// $headers = array(
+		// 	'Accept' => 'application/json',
+		// );
+		// if ( $github_token = getenv( 'GITHUB_TOKEN' ) ) {
+		// 	$headers['Authorization'] = 'token ' . $github_token;
+		// }
 
-		$response = Utils\http_request( 'GET', $url, null, $headers, $options );
+		// $response = Utils\http_request( 'GET', $url, null, $headers, $options );
 
-		if ( ! $response->success || 200 !== $response->status_code ) {
-			EE::error( sprintf( 'Failed to get latest version (HTTP code %d).', $response->status_code ) );
-		}
+		// if ( ! $response->success || 200 !== $response->status_code ) {
+		// 	EE::error( sprintf( 'Failed to get latest version (HTTP code %d).', $response->status_code ) );
+		// }
 
-		$release_data = json_decode( $response->body );
+		// $release_data = json_decode( $response->body );
 
-		$updates = array(
-			'major'      => false,
-			'minor'      => false,
-			'patch'      => false,
-		);
-		foreach ( $release_data as $release ) {
+		// $updates = array(
+		// 	'major'      => false,
+		// 	'minor'      => false,
+		// 	'patch'      => false,
+		// );
+		// foreach ( $release_data as $release ) {
 
-			// Get rid of leading "v" if there is one set.
-			$release_version = $release->tag_name;
-			if ( 'v' === substr( $release_version, 0, 1 ) ) {
-				$release_version = ltrim( $release_version, 'v' );
-			}
+		// 	// Get rid of leading "v" if there is one set.
+		// 	$release_version = $release->tag_name;
+		// 	if ( 'v' === substr( $release_version, 0, 1 ) ) {
+		// 		$release_version = ltrim( $release_version, 'v' );
+		// 	}
 
-			$update_type = Utils\get_named_sem_ver( $release_version, EE_VERSION );
-			if ( ! $update_type ) {
-				continue;
-			}
+		// 	$update_type = Utils\get_named_sem_ver( $release_version, EE_VERSION );
+		// 	if ( ! $update_type ) {
+		// 		continue;
+		// 	}
 
-			if ( ! empty( $updates[ $update_type ] ) && ! Comparator::greaterThan( $release_version, $updates[ $update_type ]['version'] ) ) {
-				continue;
-			}
+		// 	if ( ! empty( $updates[ $update_type ] ) && ! Comparator::greaterThan( $release_version, $updates[ $update_type ]['version'] ) ) {
+		// 		continue;
+		// 	}
 
-			$updates[ $update_type ] = array(
-				'version' => $release_version,
-				'update_type' => $update_type,
-				'package_url' => $release->assets[0]->browser_download_url,
-			);
-		}
+		// 	$updates[ $update_type ] = array(
+		// 		'version' => $release_version,
+		// 		'update_type' => $update_type,
+		// 		'package_url' => $release->assets[0]->browser_download_url,
+		// 	);
+		// }
 
-		foreach ( $updates as $type => $value ) {
-			if ( empty( $value ) ) {
-				unset( $updates[ $type ] );
-			}
-		}
+		// foreach ( $updates as $type => $value ) {
+		// 	if ( empty( $value ) ) {
+		// 		unset( $updates[ $type ] );
+		// 	}
+		// }
 
-		foreach ( array( 'major', 'minor', 'patch' ) as $type ) {
-			if ( true === \EE\Utils\get_flag_value( $assoc_args, $type ) ) {
-				return ! empty( $updates[ $type ] ) ? array( $updates[ $type ] ) : false;
-			}
-		}
+		// foreach ( array( 'major', 'minor', 'patch' ) as $type ) {
+		// 	if ( true === \EE\Utils\get_flag_value( $assoc_args, $type ) ) {
+		// 		return ! empty( $updates[ $type ] ) ? array( $updates[ $type ] ) : false;
+		// 	}
+		// }
 
-		if ( empty( $updates ) && preg_match( '#-alpha-(.+)$#', EE_VERSION, $matches ) ) {
-			$version_url = 'https://raw.githubusercontent.com/ee/builds/gh-pages/phar/NIGHTLY_VERSION';
-			$response = Utils\http_request( 'GET', $version_url );
-			if ( ! $response->success || 200 !== $response->status_code ) {
-				EE::error( sprintf( 'Failed to get current nightly version (HTTP code %d)', $response->status_code ) );
-			}
-			$nightly_version = trim( $response->body );
-			if ( EE_VERSION != $nightly_version ) {
-				$updates['nightly'] = array(
-					'version'        => $nightly_version,
-					'update_type'    => 'nightly',
-					'package_url'    => 'https://raw.githubusercontent.com/ee/builds/gh-pages/phar/ee-nightly.phar',
-				);
-			}
-		}
+		// if ( empty( $updates ) && preg_match( '#-alpha-(.+)$#', EE_VERSION, $matches ) ) {
+		// 	$version_url = 'https://raw.githubusercontent.com/ee/builds/gh-pages/phar/NIGHTLY_VERSION';
+		// 	$response = Utils\http_request( 'GET', $version_url );
+		// 	if ( ! $response->success || 200 !== $response->status_code ) {
+		// 		EE::error( sprintf( 'Failed to get current nightly version (HTTP code %d)', $response->status_code ) );
+		// 	}
+		// 	$nightly_version = trim( $response->body );
+		// 	if ( EE_VERSION != $nightly_version ) {
+		// 		$updates['nightly'] = array(
+		// 			'version'        => $nightly_version,
+		// 			'update_type'    => 'nightly',
+		// 			'package_url'    => 'https://raw.githubusercontent.com/ee/builds/gh-pages/phar/ee-nightly.phar',
+		// 		);
+		// 	}
+		// }
 
 		return array_values( $updates );
 	}
@@ -622,8 +624,6 @@ class CLI_Command extends EE_Command {
 	 *     1
 	 *
 	 * @subcommand has-command
-	 *
-	 * @when after_wp_load
 	 */
 	public function has_command( $_, $assoc_args ) {
 

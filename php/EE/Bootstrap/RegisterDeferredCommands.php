@@ -7,7 +7,7 @@ namespace EE\Bootstrap;
  *
  * Registers the deferred commands that for which no parent was registered yet.
  * This is necessary, because we can have sub-commands that have no direct
- * parent, like `wp network meta`.
+ * parent.
  *
  * @package EE\Bootstrap
  */

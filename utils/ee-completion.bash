@@ -1,11 +1,11 @@
-# bash completion for the `wp` command
+# bash completion for the `ee` command
 
-_wp_complete() {
+_ee_complete() {
 	local OLD_IFS="$IFS"
 	local cur=${COMP_WORDS[COMP_CWORD]}
 
 	IFS=$'\n';  # want to preserve spaces at the end
-	local opts="$(wp cli completions --line="$COMP_LINE" --point="$COMP_POINT")"
+	local opts="$(ee cli completions --line="$COMP_LINE" --point="$COMP_POINT")"
 
 	if [[ "$opts" =~ \<file\>\s* ]]
 	then
@@ -20,4 +20,4 @@ _wp_complete() {
 	IFS="$OLD_IFS"
 	return 0
 }
-complete -o nospace -F _wp_complete wp
+complete -o nospace -F _ee_complete ee

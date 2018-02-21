@@ -44,7 +44,7 @@
 		"ee/site-command": "dev-master"
 	},
 	"suggest": {
-		"psy/psysh": "Enhanced `wp shell` functionality"
+		"psy/psysh": "Enhanced shell functionality"
 	},
 	"autoload": {
 		"psr-0": { "EE": "php" },

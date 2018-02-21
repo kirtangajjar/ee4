@@ -187,7 +187,7 @@ class CompositeCommand {
 		$cmd_name = implode( ' ', array_slice( get_path( $this ), 1 ) );
 
 		\EE::line();
-		\EE::line( "See 'wp help $cmd_name <command>' for more information on a specific command." );
+		\EE::line( "See 'ee help $cmd_name <command>' for more information on a specific command." );
 	}
 
 	/**
