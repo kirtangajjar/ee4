@@ -64,7 +64,7 @@
 	"repositories": {
         "ee/site-command": {
             "type": "vcs",
-            "url": "git@git.rtcamp.com:riddhesh.sanghvi/site-command.git"
+            "url": "git@github.com:kirtangajjar/site-command.git"
         }
     }
 }

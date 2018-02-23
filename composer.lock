@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "e5f91715e5797d5acc49e73afc86ea26",
+    "content-hash": "84749dd099dc28baf0a28443d830abcd",
     "packages": [
         {
             "name": "composer/ca-bundle",
@@ -267,8 +267,14 @@
             "version": "dev-master",
             "source": {
                 "type": "git",
-                "url": "git@git.rtcamp.com:riddhesh.sanghvi/site-command.git",
-                "reference": "9fe96ee2f87b226c5c0f595429e88a2c18471004"
+                "url": "https://github.com/kirtangajjar/site-command.git",
+                "reference": "a9568de0eec68746bac258acd30a8da87ebacfbf"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/kirtangajjar/site-command/zipball/a9568de0eec68746bac258acd30a8da87ebacfbf",
+                "reference": "a9568de0eec68746bac258acd30a8da87ebacfbf",
+                "shasum": ""
             },
             "type": "wp-cli-package",
             "extra": {
@@ -293,7 +299,11 @@
                 "MIT"
             ],
             "homepage": "https://github.com/ee/site",
-            "time": "2018-02-21 10:03:54"
+            "support": {
+                "source": "https://github.com/kirtangajjar/site-command/tree/master",
+                "issues": "https://github.com/kirtangajjar/site-command/issues"
+            },
+            "time": "2018-02-21 12:31:16"
         },
         {
             "name": "justinrainbow/json-schema",
