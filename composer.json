@@ -64,7 +64,7 @@
 	"repositories": {
         "ee/site-command": {
             "type": "vcs",
-            "url": "git@github.com:kirtangajjar/site-command.git"
+            "url": "git@github.com:mbtamuli/site-command.git"
         }
     }
 }
