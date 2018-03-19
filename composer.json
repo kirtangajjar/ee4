@@ -1,6 +1,6 @@
 {
-	"name": "easyengine/ee",
-	"description": "The command line interface for WordPress",
+	"name": "kirtangajjar/ee",
+	"description": "EasyEngine packagist test",
 	"keywords": [ "cli", "wordpress" ],
 	"homepage": "https://ee.org",
 	"license": "MIT",
