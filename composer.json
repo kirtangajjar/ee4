@@ -40,7 +40,7 @@
 		"symfony/yaml": "^2.7|^3.0",
 		"wp-cli/autoload-splitter": "^0.1.5",
 		"wp-cli/mustangostang-spyc": "^0.6.3",
-		"wp-cli/php-cli-tools": "~0.11.2",
+		"wp-cli/php-cli-tools": "~0.11.2"
 	},
 	"suggest": {
 		"psy/psysh": "Enhanced shell functionality"
